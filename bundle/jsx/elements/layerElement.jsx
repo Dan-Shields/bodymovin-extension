@@ -54,6 +54,7 @@ $.__bodymovin.bm_layerElement = (function () {
             layerData.ddd = 0;
         }
         layerData.ind = layerInfo.index;
+        layerData.lbl = layerInfo.label;
         layerData.ty = layerType === layerTypes.adjustment ? layerTypes.nullLayer : layerType;
         layerData.isAdjustment = layerType === layerTypes.adjustment;
         layerData.nm = layerInfo.name;
