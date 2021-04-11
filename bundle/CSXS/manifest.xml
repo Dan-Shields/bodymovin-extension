@@ -35,7 +35,7 @@
 			<DispatchInfo >
 				<Resources>
 				<MainPath>./index_dev.html</MainPath>
-				<ScriptPath>./jsx/hostscript.jsx</ScriptPath>
+				<ScriptPath>./jsx/hostscript.jsxinc</ScriptPath>
                 <CEFCommandLine>
                     <Parameter>--enable-nodejs</Parameter>
                     <Parameter>--mixed-context</Parameter>

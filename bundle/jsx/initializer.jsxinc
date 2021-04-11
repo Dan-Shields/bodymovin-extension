@@ -1,0 +1,181 @@
+/*jslint vars: true , plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
+/*global $*/
+
+
+$.__bodymovin = $.__bodymovin || {esprima:{}}
+
+
+//  Does not work with `new funcA.bind(thisArg, args)`
+if (!Function.prototype.bm_bind) (function(){
+  var slice = Array.prototype.slice;
+  Function.prototype.bm_bind = function() {
+    var thatFunc = this, thatArg = arguments[0];
+    var args = slice.call(arguments, 1);
+    if (typeof thatFunc !== 'function') {
+      // closest thing possible to the ECMAScript 5
+      // internal IsCallable function
+      throw new TypeError('Function.prototype.bm_bind - ' +
+             'what is trying to be bound is not callable');
+    }
+    return function(){
+      var funcArgs = args.concat(slice.call(arguments))
+      return thatFunc.apply(thatArg, funcArgs);
+    };
+  };
+})();
+
+(function() {
+  var files = [
+  'JSON.jsxinc',
+  'eventManager.jsxinc',
+  'enums/layerTypes.jsxinc',
+  'enums/layerStyleTypes.jsxinc',
+  'enums/shapeTypes.jsxinc',
+  'enums/maskTypes.jsxinc',
+  'helpers/layerResolver.jsxinc',
+  'helpers/layerStyleResolver.jsxinc',
+  'helpers/shapeTypeResolver.jsxinc',
+  'helpers/maskTypeResolver.jsxinc',
+  'helpers/settingsHelper.jsxinc',
+  'helpers/renderHelper.jsxinc',
+  'helpers/versionHelper.jsxinc',
+  'helpers/renderQueueHelper.jsxinc',
+  'utils/generalUtils.jsxinc',
+  'reports/rendererTypes.jsxinc',
+  'reports/builderTypes.jsxinc',
+  'reports/messageTypes.jsxinc',
+  'reports/effectsMessageTypes.jsxinc',
+  'reports/reportMessageFactory.jsxinc',
+  'reports/reportEffectMessageFactory.jsxinc',
+  'reports/reportAnimatorSelectorMessageFactory.jsxinc',
+  'reports/reportAnimatorMessageFactory.jsxinc',
+  'reports/messageClassReport.jsxinc',
+  'reports/propertyReport.jsxinc',
+  'reports/positionReport.jsxinc',
+  'reports/rotationReport.jsxinc',
+  'reports/masks/maskReport.jsxinc',
+  'reports/effectsReport.jsxinc',
+  'reports/masksReport.jsxinc',
+  'reports/transformReport.jsxinc',
+  'reports/layerStyles/strokeStyle.jsxinc',
+  'reports/layerStyles/dropShadowStyle.jsxinc',
+  'reports/layerStyles/innerShadowStyle.jsxinc',
+  'reports/layerStyles/outerGlowStyle.jsxinc',
+  'reports/layerStyles/innerGlowStyle.jsxinc',
+  'reports/layerStyles/bevelEmbossStyle.jsxinc',
+  'reports/layerStyles/satinStyle.jsxinc',
+  'reports/layerStyles/colorOverlayStyle.jsxinc',
+  'reports/layerStyles/gradientOverlayStyle.jsxinc',
+  'reports/layerStylesReport.jsxinc',
+  'reports/layerReport.jsxinc',
+  'reports/layers/shapes/shapeGroupReport.jsxinc',
+  'reports/layers/shapes/shapeRectReport.jsxinc',
+  'reports/layers/shapes/shapeEllipseReport.jsxinc',
+  'reports/layers/shapes/shapeStarReport.jsxinc',
+  'reports/layers/shapes/shapeShapeReport.jsxinc',
+  'reports/layers/shapes/shapeFillReport.jsxinc',
+  'reports/layers/shapes/shapeStrokeReport.jsxinc',
+  'reports/layers/shapes/shapeGradientFillReport.jsxinc',
+  'reports/layers/shapes/shapeGradientStrokeReport.jsxinc',
+  'reports/layers/shapes/shapeMergePathsReport.jsxinc',
+  'reports/layers/shapes/shapeRoundCornersReport.jsxinc',
+  'reports/layers/shapes/shapePuckerAndBloatReport.jsxinc',
+  'reports/layers/shapes/shapeTrimPathsReport.jsxinc',
+  'reports/layers/shapes/shapeRepeaterReport.jsxinc',
+  'reports/layers/shapes/shapeUnhandledReport.jsxinc',
+  'reports/layers/shapes/shapeReportHelper.jsxinc',
+  'reports/layers/shapes/shapeCollectionReport.jsxinc',
+  'reports/layers/texts/textAnimatorSelectorReport.jsxinc',
+  'reports/layers/texts/textAnimatorsReport.jsxinc',
+  'reports/layers/imageLayerReport.jsxinc',
+  'reports/layers/imageSequenceLayerReport.jsxinc',
+  'reports/layers/cameraLayerReport.jsxinc',
+  'reports/layers/audioLayerReport.jsxinc',
+  'reports/layers/nullLayerReport.jsxinc',
+  'reports/layers/solidLayerReport.jsxinc',
+  'reports/layers/adjustmentLayerReport.jsxinc',
+  'reports/layers/lightLayerReport.jsxinc',
+  'reports/layers/textLayerReport.jsxinc',
+  'reports/layers/unhandledLayerReport.jsxinc',
+  'reports/layers/failedLayerReport.jsxinc',
+  'reports/layers/compositionLayerReport.jsxinc',
+  'reports/layers/shapeLayerReport.jsxinc',
+  'reports/layerReportHelper.jsxinc',
+  'reports/layerCollectionReport.jsxinc',
+  'reports/animationReport.jsxinc',
+  'reports/reportsManager.jsxinc',
+  'downloadManager.jsxinc',
+  'utils/expressions/keyframeBakerHelper.jsxinc',
+  'utils/expressions/reservedPropertiesHelper.jsxinc',
+  'utils/expressions/valueAssignmentHelper.jsxinc',
+  'utils/expressions/variableDeclarationHelper.jsxinc',
+  'utils/expressionHelper.jsxinc',
+  'helpers/fileManager.jsxinc',
+  'helpers/presetHelper.jsxinc',
+  'exporters/exporterHelpers.jsxinc',
+  'exporters/bannerExporter.jsxinc',
+  'exporters/standardExporter.jsxinc',
+  'exporters/standaloneExporter.jsxinc',
+  'exporters/demoExporter.jsxinc',
+  'exporters/avdExporter.jsxinc',
+  'exporters/riveExporter.jsxinc',
+  'importers/lottieImporter.jsxinc',
+  'esprima.jsxinc',
+  'annotationsManager.jsxinc',
+  'escodegen.jsxinc',
+  'utils/bez.jsxinc',
+  'utils/keyframeHelper.jsxinc',
+  'utils/transformHelper.jsxinc',
+  'utils/maskHelper.jsxinc',
+  'utils/timeremapHelper.jsxinc',
+  'utils/effectsHelper.jsxinc',
+  'utils/layerStylesHelper.jsxinc',
+  'utils/cameraHelper.jsxinc',
+  'utils/audioHelper.jsxinc',
+  'utils/dataHelper.jsxinc',
+  'utils/XMPParser.jsxinc',
+  'utils/ProjectParser.jsxinc',
+  'utils/markerHelper.jsxinc',
+  'utils/textAnimatorHelper.jsxinc',
+  'utils/textHelper.jsxinc',
+  'utils/imageSeqHelper.jsxinc',
+  'helpers/boundingBox.jsxinc',
+  'helpers/blendModes.jsxinc',
+  'elements/layerElement.jsxinc',
+  'projectManager.jsxinc',
+  'compsManager.jsxinc',
+  'dataManager.jsxinc',
+  'renderManager.jsxinc',
+  'utils/audioSourceHelper.jsxinc',
+  'utils/dataSourceHelper.jsxinc',
+  'utils/sourceHelper.jsxinc',
+  'utils/shapeHelper.jsxinc',
+  'utils/textShapeHelper.jsxinc',
+  'utils/transformation-matrix.jsxinc'
+  ]
+
+  var _bmFile = new File($.fileName)
+  _bmFile = _bmFile.parent
+  for(var i = 0; i < files.length; i += 1) {
+    var file = new File(_bmFile.fsName)
+    file.changePath(files[i])
+    $.evalFile(file.fsName);
+  }
+}())
+
+var globalVariables = ['bm_eventDispatcher','bm_generalUtils','bm_expressionHelper','esprima', 'escodegen'
+, 'bez', 'PropertyFactory', 'bm_keyframeHelper', 'bm_transformHelper', 'bm_maskHelper', 'bm_timeremapHelper'
+, 'bm_effectsHelper', 'bm_layerStylesHelper', 'bm_cameraHelper', 'bm_XMPHelper', 'bm_ProjectHelper', 'bm_markerHelper'
+, 'bm_textHelper', 'bm_boundingBox', 'bm_layerElement', 'bm_projectManager', 'bm_compsManager', 'bm_dataManager'
+, 'bm_renderManager', 'bm_downloadManager', 'bm_sourceHelper', 'bm_shapeHelper', 'bm_textAnimatorHelper'
+, 'bm_textShapeHelper']
+var i, len = globalVariables.length;
+for(i = 0; i < len; i += 1) {
+	if(this[globalVariables[i]]) {
+		this[globalVariables[i]] = null;
+		delete this[globalVariables[i]];
+		//$.__bodymovin.bm_eventDispatcher.log(globalVariables[i] + ' exists');
+	} else {
+		//$.__bodymovin.bm_eventDispatcher.log(globalVariables[i] + ' not exists');
+	}
+}

@@ -1,7 +1,7 @@
 import {SystemPath} from './CSInterface'
 import csInterface from './CSInterfaceHelper'
 
-var fileName = 'initializer.jsx';
+var fileName = 'initializer.jsxinc';
 var promise = new Promise(loadJSX);
 var isRunning = false;
 

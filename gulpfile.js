@@ -65,7 +65,7 @@ gulp.task('copy-debug', function() {
 });
 
 gulp.task('copy-versionHelper', function() {
-	return gulp.src('bundle/jsx/helpers/versionHelper.jsx')
+	return gulp.src('bundle/jsx/helpers/versionHelper.jsxinc')
 	//.pipe(replace(/(v : ')(.+)(',)/g,'$1'+version+'$3'))
 		.pipe(replace(/(version_number = ')(.+)(';)/g,'$1'+version+'$3'))
 		.pipe(gulp.dest('build/jsx/helpers/'));
