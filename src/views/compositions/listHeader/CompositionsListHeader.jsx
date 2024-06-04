@@ -94,10 +94,10 @@ class CompositionsListHeader extends React.Component {
 					</div>
 				</li>
     		<li 
-          className={css(styles.item, styles.destination, textEllipsis)}
-        >
-          <div>../Destination Folder</div>
-        </li>
+					className={css(styles.item, styles.destination, textEllipsis)}
+				>
+					<div>../Destination Folder</div>
+				</li>
     	</ul>
     	);
 	}

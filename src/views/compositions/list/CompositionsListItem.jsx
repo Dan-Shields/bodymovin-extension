@@ -17,9 +17,9 @@ const styles = StyleSheet.create({
 		backgroundColor: Variables.colors.gray_darkest,
 		height: '30px',
 		marginBottom: '2px',
-      ':hover': {
-        background: Variables.gradients.blueGreen,
-      }
+		':hover': {
+			background: Variables.gradients.blueGreen,
+		}
 	},
 	composition__selected: {
 		background: Variables.gradients.blueGreen

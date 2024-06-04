@@ -22,5 +22,5 @@ export default combineReducers({
 	importer,
 	annotations,
 	reports,
-  supported_features,
+	supported_features,
 })

@@ -74,9 +74,9 @@ function getHeaderType(importState) {
 
 function Import_header(props) {
 	return (<div className={css(styles.container)}>
-                <BaseHeader/>
-				<div className={css(styles.buttons_container)}>
-                    {getHeaderType(props.state) !== 'processing' && 
+		<BaseHeader/>
+		<div className={css(styles.buttons_container)}>
+			{getHeaderType(props.state) !== 'processing' && 
                         <div className={css(styles.buttons_subgroup)}>
                         	<BaseButton text='Import Local File' type='green' classes={styles.button_flex} onClick={props.onSelect} />
                         	<div className={css(styles.input_container)}>

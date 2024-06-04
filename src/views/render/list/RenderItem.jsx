@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
 		height: '100%',
 		flexGrow: 0,
 		padding: '5px',
-        cursor: 'pointer',
+		cursor: 'pointer',
 	},
 	'compElementContentToggle--clickable': {
     	width: '30px',
@@ -95,30 +95,30 @@ let RenderItem = (props) => {
                     >
                     	<img src={report_icon}  className={css(styles.compElementContentFolder__image)} alt='Report' />
                     </div>
-                }
-                    <div
-                        onClick={()=>props.preview(props.item)}
-                        className={css(styles.compElementContentToggle)}
-                        title={'Preview'}
-                    >
-                    <img src={complete_icon}  className={css(styles.compElementContentFolder__image)} alt='toggle' />
-                    </div>
-                    {props.item.settings.template && !!props.item.settings.template.errors.length && 
+			}
+			<div
+				onClick={()=>props.preview(props.item)}
+				className={css(styles.compElementContentToggle)}
+				title={'Preview'}
+			>
+				<img src={complete_icon}  className={css(styles.compElementContentFolder__image)} alt='toggle' />
+			</div>
+			{props.item.settings.template && !!props.item.settings.template.errors.length && 
                         <div
-                            onClick={()=>props.template(props.item)}
-                            className={css(styles.compElementContentToggle)}
-                            title={'Blueprint report'}
+                        	onClick={()=>props.template(props.item)}
+                        	className={css(styles.compElementContentToggle)}
+                        	title={'Blueprint report'}
                         >
-                        <img src={warning_icon}  className={css(styles.compElementContentFolder__image)} alt='toggle' />
+                        	<img src={warning_icon}  className={css(styles.compElementContentFolder__image)} alt='toggle' />
                         </div>
-                    }
-				<div className={css(styles.compElementContentFolder)}>
-                    <div className={css(styles.compElementContentFolder__button)} onClick={()=>props.navigateToFolder(props.item)}>
-                        <BodymovinFolder />
-                    </div>
+			}
+			<div className={css(styles.compElementContentFolder)}>
+				<div className={css(styles.compElementContentFolder__button)} onClick={()=>props.navigateToFolder(props.item)}>
+					<BodymovinFolder />
 				</div>
 			</div>
-			</li>)
+		</div>
+	</li>)
 }
 
 export default RenderItem

@@ -86,16 +86,16 @@ class BaseButton extends React.Component{
 			this.props.classes
 		)
 
-    return (
-      <button 
-        disabled={this.props.disabled}
-        title={this.props.alt || this.props.text} 
-        className={containerClasses} 
-        onClick={this.props.onClick} 
-        onMouseEnter={this.mouseEnterHandler} 
-        onMouseLeave={this.mouseLeaveHandler}
-      >
-        {this.props.icon && 
+		return (
+			<button 
+				disabled={this.props.disabled}
+				title={this.props.alt || this.props.text} 
+				className={containerClasses} 
+				onClick={this.props.onClick} 
+				onMouseEnter={this.mouseEnterHandler} 
+				onMouseLeave={this.mouseLeaveHandler}
+			>
+				{this.props.icon && 
           <Bodymovin animationData={this.props.icon} ref={(elem)=>this.bm_instance = elem} autoplay={false} loop={false}>
           	<div className={css(styles.icon)}></div>
           </Bodymovin>

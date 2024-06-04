@@ -1,9 +1,9 @@
 /*jslint vars: true , plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
 
 const reserverPropertiesHelper = (function () {
-    var ob = {
-        replaceProperties: replaceProperties
-    };
+	var ob = {
+		replaceProperties: replaceProperties
+	};
 
 	var reserved_properties = ['position', 'scale', 'anchorPoint', 'rotation']
 
@@ -98,7 +98,7 @@ const reserverPropertiesHelper = (function () {
 	function processFunctionExpression(expression, inner_closures, declared_variables) {
 		if(expression.body && expression.body.type === 'BlockStatement') {
 			inner_closures.push(createFunctionClosure(expression, declared_variables));
-            // inner_closures.push(new Closure(expression.body.body, declared_variables));
+			// inner_closures.push(new Closure(expression.body.body, declared_variables));
 		}
 	}
 

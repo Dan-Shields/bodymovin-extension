@@ -10,7 +10,7 @@ let routes = {
 	importFile: 6,
 	annotations: 7,
 	reports: 8,
-  supported_features: 9,
+	supported_features: 9,
 }
 
 let initialState = {
@@ -51,8 +51,8 @@ export default function project(state = initialState, action) {
 			return {...state, ...{route: routes.annotations}}
 		case actionTypes.GOTO_REPORTS:
 			return {...state, ...{route: routes.reports}}
-    case actionTypes.GOTO_SUPPORTED_FEATURES:
-      return {...state, ...{route: routes.supported_features}}
+		case actionTypes.GOTO_SUPPORTED_FEATURES:
+			return {...state, ...{route: routes.supported_features}}
 		default:
 			return state
 	}

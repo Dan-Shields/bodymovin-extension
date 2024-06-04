@@ -101,7 +101,7 @@ class Compositions extends React.Component {
 				<div 
 					className={css(styles.toggleButton)} 
 					onClick={this.props.selectAllComps}>
-						{'Select All Comps'}
+					{'Select All Comps'}
 				</div>
 			)
 		} else {
@@ -109,7 +109,7 @@ class Compositions extends React.Component {
 				<div 
 					className={css(styles.toggleButton)} 
 					onClick={this.props.unselectAllComps}>
-						{'Unselect All Comps'}
+					{'Unselect All Comps'}
 				</div>
 			)
 		}

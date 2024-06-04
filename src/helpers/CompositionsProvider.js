@@ -105,8 +105,8 @@ csInterface.addEventListener('bm:project:id', function (ev) {
 		const name = data.name
 		dispatcher({ 
 			type: actions.PROJECT_SET_ID,
-				id: id,
-				name: name,
+			id: id,
+			name: name,
 		})
 	} else {
 	}
@@ -117,7 +117,7 @@ csInterface.addEventListener('bm:temp:id', function (ev) {
 		let data = (typeof ev.data === "string") ? JSON.parse(ev.data) : ev.data
 		let id = data.id
 		dispatcher({ 
-				type: actions.PROJECT_SET_TEMP_ID,
+			type: actions.PROJECT_SET_TEMP_ID,
 			id: id
 		})
 	}

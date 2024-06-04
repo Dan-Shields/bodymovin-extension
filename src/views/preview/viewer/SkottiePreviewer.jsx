@@ -42,14 +42,14 @@ class SkottiePreviewer extends React.PureComponent {
   }
 
   async updateFrame() {
-    const CanvasKit = this.CanvasKit
-    const totalFrames = this.props.animationData.op - this.props.animationData.ip;
-    const frame = parseInt(totalFrames * this.props.progress, 10)
-    this.skottieInstance.seekFrame(frame);
-    var bounds = CanvasKit.LTRBRect(0, 0, this.props.animationData.w * window.devicePixelRatio,
-      this.props.animationData.h * window.devicePixelRatio);
-    this.skottieInstance.render(this.skottieCanvas, bounds);
-    this.skottieSurface.flush();
+  	const CanvasKit = this.CanvasKit
+  	const totalFrames = this.props.animationData.op - this.props.animationData.ip;
+  	const frame = parseInt(totalFrames * this.props.progress, 10)
+  	this.skottieInstance.seekFrame(frame);
+  	var bounds = CanvasKit.LTRBRect(0, 0, this.props.animationData.w * window.devicePixelRatio,
+  		this.props.animationData.h * window.devicePixelRatio);
+  	this.skottieInstance.render(this.skottieCanvas, bounds);
+  	this.skottieSurface.flush();
   }
 
   destroyCurrentAnimation() {

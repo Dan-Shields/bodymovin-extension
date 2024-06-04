@@ -15,9 +15,9 @@ const storingDataSelector = createSelector(
   		data: {
   			compositions: compositions,
   			extraState: {
-						filter: compositionState.filter,
-						show_only_selected: compositionState.show_only_selected,
-						shouldUseCompNameAsDefault: compositionState.shouldUseCompNameAsDefault,
+					filter: compositionState.filter,
+					show_only_selected: compositionState.show_only_selected,
+					shouldUseCompNameAsDefault: compositionState.shouldUseCompNameAsDefault,
 					shouldUseAEPathAsDestinationFolder: compositionState.shouldUseAEPathAsDestinationFolder,
 					shouldUsePathAsDefaultFolder: compositionState.shouldUsePathAsDefaultFolder,
 					shouldIncludeCompNameAsFolder: compositionState.shouldIncludeCompNameAsFolder,

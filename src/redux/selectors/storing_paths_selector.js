@@ -7,9 +7,9 @@ const storingPathsSelector = createSelector(
 	[ getPaths, getProjectPath ],
 	(paths, projectPath) => {
   	return {
-      ...paths,
-      projectPath,
-    }
+			...paths,
+			projectPath,
+		}
 	}
 )
 

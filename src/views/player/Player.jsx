@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
 	},
 	back_container: {
 		display: 'flex',
-      justifyContent: 'space-between',
+		justifyContent: 'space-between',
 
 	},
 	anim_container: {
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
 	},
 	buttons_container: {
 		textAlign: 'center',
-      marginBottom: '16px',
+		marginBottom: '16px',
 	},
 	buttonSeparator: {
 		width: '10px',
@@ -76,7 +76,7 @@ class Player extends React.Component {
 	render() {
 		return (
 			<div className={css(styles.container)}>
-        <BaseHeader />
+				<BaseHeader />
 				<div className={css(styles.back_container)}>
 					<BaseButton text={'Clear Caché'} type='green' onClick={this.props.clearCache} />
 				</div>
@@ -107,7 +107,7 @@ class Player extends React.Component {
 }
 const mapDispatchToProps = {
 	goToComps: goToComps,
-  clearCache: clearCache,
+	clearCache: clearCache,
 }
 
 export default connect(null, mapDispatchToProps)(Player)

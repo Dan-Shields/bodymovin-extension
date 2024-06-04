@@ -73,7 +73,7 @@ function saveProjectDataToPath(data) {
 	try {
 		if (data.extraState.shouldKeepCopyOfSettings
 			&& data.extraState.settingsDestinationCopy) {
-				fs.writeFileSync(data.extraState.settingsDestinationCopy.destination, JSON.stringify(data))
+			fs.writeFileSync(data.extraState.settingsDestinationCopy.destination, JSON.stringify(data))
 		}
 	} catch (err) {
 	}
@@ -147,7 +147,7 @@ function *saveStoredData() {
 				yield put({ 
 					type: actions.SETTINGS_SAVE_FAILED,
 					projects,
-			})
+				})
 			}
 		}
 	}
@@ -224,9 +224,9 @@ export default [
 	takeEvery([actions.APP_INITIALIZED], getVersion),
 	takeEvery([actions.APP_INITIALIZED], getLottieFilesSizes),
 	takeEvery([actions.APP_INITIALIZED], start),
-  takeEvery([actions.PROJECT_SET_ID], compressAllSettings),
-  takeEvery([actions.APP_CLEAR_CACHE_CONFIRMED], clearCache),
-  takeEvery([actions.APP_CLEAR_CACHE_PROJECTS], clearProjectsFromCache),
+	takeEvery([actions.PROJECT_SET_ID], compressAllSettings),
+	takeEvery([actions.APP_CLEAR_CACHE_CONFIRMED], clearCache),
+	takeEvery([actions.APP_CLEAR_CACHE_PROJECTS], clearProjectsFromCache),
 	fork(saveStoredData),
 	fork(savePathsData)
 ]

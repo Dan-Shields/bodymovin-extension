@@ -64,9 +64,9 @@ class SettingsExportMode extends React.PureComponent {
 						<div className={css(styles.modeItem)}>
 							<SettingsAVD />
 						</div>
-            <div className={css(styles.modeItem)}>
-              <SettingsSMIL />
-            </div>
+						<div className={css(styles.modeItem)}>
+							<SettingsSMIL />
+						</div>
 					</div>
 				</div>
 			</div>

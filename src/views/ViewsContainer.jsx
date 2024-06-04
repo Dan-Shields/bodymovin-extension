@@ -33,8 +33,8 @@ function getView(route) {
 			return <AnnotationsView />
 		case routes.reports:
 			return <ReportsView />
-      case routes.supported_features:
-        return <SupportedFeatures />
+		case routes.supported_features:
+			return <SupportedFeatures />
 		default:
 			return <Compositions />
 	}
