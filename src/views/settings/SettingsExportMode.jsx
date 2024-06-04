@@ -4,6 +4,7 @@ import { StyleSheet, css } from 'aphrodite'
 import SettingsBanner from './SettingsBanner'
 import SettingsStandard from './SettingsExportModeStandard'
 import SettingsAVD from './SettingsExportModeAVD'
+import SettingsSMIL from './SettingsExportModeSMIL'
 import SettingsFlare from './SettingsExportModeFlare'
 import SettingsDemo from './SettingsExportModeDemo'
 import SettingsStandalone from './SettingsExportModeStandalone'
@@ -63,6 +64,9 @@ class SettingsExportMode extends React.PureComponent {
 						<div className={css(styles.modeItem)}>
 							<SettingsAVD />
 						</div>
+            <div className={css(styles.modeItem)}>
+              <SettingsSMIL />
+            </div>
 					</div>
 				</div>
 			</div>

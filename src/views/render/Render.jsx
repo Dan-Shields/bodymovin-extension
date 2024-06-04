@@ -50,58 +50,89 @@ const styles = StyleSheet.create({
 	},
 	headerAnim: {
     	width: '50px',
-		height: '100%',
-		display: 'inline-block',
-		verticalAlign: 'middle'
-	},
-	renderBar: {
-		borderRadius:'4px',
-		height:'8px',
-		width: '100%',
-		overflow: 'hidden',
-		position:'relative',
-		flexGrow: 0,
-		marginBottom: '20px'
-	},
-	renderBarBackground: {
-		borderRadius:'4px',
-		height:'100%',
-		width: '100%',
-		backgroundColor: '#303030'
-	},
-	renderBarProgress: {
-		borderRadius:'4px',
-		height:'100%',
-		width: '100%',
-		position: 'absolute',
-		top:0,
-		left:0,
-		background: 'linear-gradient(left, rgb(0,142,211) 15%,rgb(0,182,72) 85%)'
-	},
-	compsListContainer: {
-		width: '100%',
-		background: 'black',
-		flexGrow: 1,
-		overflow: 'hidden',
-		position: 'relative'
-	},
-	compsList: {
-		width: '100%',
-		height: '100%',
-		position: 'absolute',
-		top: '0',
-		left: '0',
-		overflow: 'auto'
-	},
-	bottomNavigation: {
-		borderRadius:'4px',
-		width: '100%',
-		flexGrow: 0,
-		height: '40px',
-		marginBottom: '20px',
-		marginTop: '20px',
-		textAlign: 'center'
-	}
+      height: '100%',
+      display: 'inline-block',
+      verticalAlign: 'middle'
+    },
+    renderBar: {
+      borderRadius:'4px',
+      height:'8px',
+      width: '100%',
+      overflow: 'hidden',
+      position:'relative',
+      flexGrow: 0,
+			marginBottom: '20px'
+    },
+    renderBarBackground: {
+      borderRadius:'4px',
+      height:'100%',
+      width: '100%',
+      backgroundColor: '#303030'
+    },
+    renderBarProgress: {
+      borderRadius:'4px',
+      height:'100%',
+      width: '100%',
+      position: 'absolute',
+      top:0,
+      left:0,
+			background: 'linear-gradient(left, rgb(0,142,211) 15%,rgb(0,182,72) 85%)'
+    },
+    compsListContainer: {
+      width: '100%',
+      background: 'black',
+      flexGrow: 1,
+      overflow: 'hidden',
+      position: 'relative'
+    },
+    compsList: {
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      overflow: 'auto'
+    },
+    bottomNavigation: {
+      borderRadius:'4px',
+      width: '100%',
+      flexGrow: 0,
+      height: '40px',
+      marginBottom: '20px',
+      marginTop: '20px',
+      textAlign: 'center'
+    },
+    templateModal: {
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      padding: '20px',
+      backgroundColor: 'rgba(0,0,0,0.75)',
+
+    },
+    templateModalContent: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: '#474747',
+      padding: '8px',
+    },
+    templateModalContentTitle: {
+      color: Variables.colors.white,
+      fontSize: '16px',
+      marginBottom: '24px',
+    },
+    templateModalContentList: {
+      color: Variables.colors.white,
+      fontSize: '12px',
+    },
+    templateModalContentListItem: {
+      color: Variables.colors.white,
+      backgroundColor: Variables.colors.gray_darkest,
+      padding: '8px 4px',
+      margin: '4px 0',
+    },
 })
 
 class Render extends React.Component {
@@ -110,6 +141,9 @@ class Render extends React.Component {
 		super()
 		this.endRender = this.endRender.bind(this)
 		this.getItem = this.getItem.bind(this)
+    this.state = {
+      templateErrors: null,
+    }
 	}
 
 	getItem(item) {
@@ -120,6 +154,7 @@ class Render extends React.Component {
 				navigateToFolder={this.navigateToFolder} 
 				navigateToReports={this.props.goToReports} 
 				preview={this.preview} 
+        template={this.template} 
 			/>)
 	}
 
@@ -142,6 +177,18 @@ class Render extends React.Component {
 
   preview = (item) => {
   	this.props.previewAnimation(item.destination)
+  }
+
+  template = (item) => {
+    this.setState({
+      templateErrors: item.settings.template.errors,
+    })
+  }
+
+  closeTemplate = () => {
+    this.setState({
+      templateErrors: null,
+    })
   }
 
 
@@ -171,6 +218,16 @@ class Render extends React.Component {
 	    			<BaseButton text={finishText} type='green' onClick={this.endRender}></BaseButton>
 	    		</div>
     		</div>
+        {this.state.templateErrors && <div className={css(styles.templateModal)} onClick={this.closeTemplate}>
+          <div className={css(styles.templateModalContent)}>
+            <div className={css(styles.templateModalContentTitle)}>The animation does not comply to the template requirements</div>
+            <ul className={css(styles.templateModalContentList)}>
+              {this.state.templateErrors.map((templateError, templateErrorIndex) => {
+                return <li key={templateErrorIndex} className={css(styles.templateModalContentListItem)}>{templateError.message}</li>
+              })}
+            </ul>
+          </div>
+        </div>}
     	</div>
     	);
   }

@@ -7,10 +7,25 @@ import SettingsListDropdown from './list/SettingsListDropdown'
 import SettingsExportMode from './SettingsExportMode'
 import SettingsCollapsableItem from './collapsable/SettingsCollapsableItem'
 import SettingsAssets from './SettingsAssets'
-import {setCurrentCompId, cancelSettings, toggleSettingsValue, updateSettingsValue, toggleExtraComp, goToComps, rememberSettings, applySettings} from '../../redux/actions/compositionActions'
+import SettingsMetadata from './SettingsMetadata'
+import {
+  setCurrentCompId,
+  cancelSettings,
+  toggleSettingsValue,
+  updateSettingsValue,
+  toggleExtraComp,
+  goToComps,
+  rememberSettings,
+  applySettings,
+  addMetadataCustomProp,
+  deleteMetadataCustomProp,
+	metadataCustomPropTitleChange,
+	metadataCustomPropValueChange,
+} from '../../redux/actions/compositionActions'
 import settings_view_selector from '../../redux/selectors/settings_view_selector'
 import Variables from '../../helpers/styles/variables'
 import audioBitOptions from '../../helpers/enums/audioBitOptions'
+import SettingsTemplate from './SettingsTemplate'
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -126,7 +141,9 @@ class Settings extends React.PureComponent {
 		super()
 		this.storedSettings = null
 		this.cancelSettings = this.cancelSettings.bind(this)
+    this.toggleValue = this.toggleValue.bind(this)
 		this.toggleGlyphs = this.toggleValue.bind(this,'glyphs')
+    this.toggleExtraChars = this.toggleValue.bind(this,'includeExtraChars')
 		this.toggleGuideds = this.toggleValue.bind(this,'guideds')
 		this.toggleHiddens = this.toggleValue.bind(this,'hiddens')
 		this.toggleOriginalNames = this.toggleValue.bind(this,'original_names')
@@ -134,9 +151,11 @@ class Settings extends React.PureComponent {
 		this.toggleCompressImages = this.toggleValue.bind(this,'should_compress')
 		this.toggleEncodeImages = this.toggleValue.bind(this,'should_encode_images')
 		this.toggleSkipImages = this.toggleValue.bind(this,'should_skip_images')
+    this.toggleReuseImages = this.toggleValue.bind(this,'should_reuse_images')
 		this.toggleIncludeVideo = this.toggleValue.bind(this,'should_include_av_assets')
 		this.toggleExpressionProperties = this.toggleValue.bind(this,'ignore_expression_properties')
 		this.toggleJsonFormat = this.toggleValue.bind(this,'export_old_format')
+    this.toggleSourceNames = this.toggleValue.bind(this,'use_source_names')
 		this.toggleTrimData = this.toggleValue.bind(this,'shouldTrimData')
 		this.toggleSkipDefaultProperties = this.toggleValue.bind(this,'skip_default_properties')
 		this.toggleNotSupportedProperties = this.toggleValue.bind(this,'not_supported_properties')
@@ -149,6 +168,10 @@ class Settings extends React.PureComponent {
 		this.toggleBakeExpressionProperties = this.toggleValue.bind(this,'expressions:shouldBake')
 		this.toggleCacheExpressionProperties = this.toggleValue.bind(this,'expressions:shouldCacheExport')
 		this.toggleExtendBakeBeyondWorkArea = this.toggleValue.bind(this,'expressions:shouldBakeBeyondWorkArea')
+    this.toggleCompNamesAsIds = this.toggleValue.bind(this,'useCompNamesAsIds')
+    this.toggleEssentialPropertiesActive = this.toggleValue.bind(this,'essentialProperties:active')
+    this.toggleEssentialPropertiesAsSlots = this.toggleValue.bind(this,'essentialProperties:useSlots')
+    this.toggleEssentialPropertiesCompSkip = this.toggleValue.bind(this,'essentialProperties:skipExternalComp')
 		this.toggleBundleFonts = this.toggleValue.bind(this,'bundleFonts')
 		this.toggleInlineFonts = this.toggleValue.bind(this,'inlineFonts')
 	}
@@ -246,6 +269,11 @@ class Settings extends React.PureComponent {
   						description='If selected it converts fonts to shapes'
   						toggleItem={this.toggleGlyphs}
   						active={this.props.settings ? this.props.settings.glyphs : false} />
+            <SettingsListItem 
+              title='Replace Characters with Comps'
+              description='Replaces characters with custom compositions from folder'
+              toggleItem={this.toggleExtraChars}
+              active={this.props.settings ? this.props.settings.includeExtraChars : false} />
   					{!this.props.settings.glyphs && 
               <SettingsListItem 
               	title='Bundle Fonts'
@@ -287,11 +315,13 @@ class Settings extends React.PureComponent {
   						settings={this.props.settings}
   						canCompressAssets={this.props.canCompressAssets}
   						toggleOriginalNames={this.toggleOriginalNames}
+              toggleSourceNames={this.toggleSourceNames}
   						toggleOriginalAssets={this.toggleOriginalAssets}
   						toggleCompressImages={this.toggleCompressImages}
   						qualityChange={this.qualityChange}
   						toggleEncodeImages={this.toggleEncodeImages}
   						toggleSkipImages={this.toggleSkipImages}
+              toggleReuseImages={this.toggleReuseImages}
   						toggleIncludeVideo={this.toggleIncludeVideo}
   					/>
             
@@ -362,7 +392,50 @@ class Settings extends React.PureComponent {
   							description='Export in a more human readable format. Do not use for final file since filesize gets significantly larger.'
   							toggleItem={this.togglePrettyPrint}
   							active={this.props.settings ? this.props.settings.pretty_print : false}  />
+              <SettingsListItem 
+                title='Use composition names as ids'
+                description='Composition names will be used as reference ids'
+                toggleItem={this.toggleCompNamesAsIds}
+                active={this.props.settings ? this.props.settings.useCompNamesAsIds : false}  />
   					</SettingsCollapsableItem>
+            <SettingsCollapsableItem 
+              title={'Essential properties'}
+              description={'Essential properties'}
+              >
+                
+                <SettingsListItem
+                  title='Export essential properties'
+                  description='Export essential properties from the root composition'
+                  toggleItem={this.toggleEssentialPropertiesActive}
+                  active={this.props.settings ? this.props.settings.essentialProperties.active : false}
+                />
+                {this.props.settings.essentialProperties.active &&
+                  <SettingsListItem
+                    title='Export essential properties as slots'
+                    description='If active will map essential properties to slots on the json file that allows for easy modification. If deactivated, it will replace the properties inline in the composition.'
+                    toggleItem={this.toggleEssentialPropertiesAsSlots}
+                    active={this.props.settings ? this.props.settings.essentialProperties.useSlots : false}
+                  />
+                }
+                {this.props.settings.essentialProperties.active && this.props.settings.essentialProperties.useSlots &&
+                  <SettingsListItem
+                    title='Skip outermost external composition'
+                    description='Usually essential comps are applied to the outermost composition. This will skip that composition, but still include the slots in the final JSON'
+                    toggleItem={this.toggleEssentialPropertiesCompSkip}
+                    active={this.props.settings ? this.props.settings.essentialProperties.skipExternalComp : false}
+                  />
+                }
+
+              </SettingsCollapsableItem>
+            <SettingsMetadata
+              data={this.props.settings.metadata}
+              toggle={this.toggleValue}
+              onTitleChange={this.props.onMetadataTitleChange}
+              onValueChange={this.props.onMetadataValueChange}
+              onDeleteCustomProp={this.props.onMetadataDeleteCustomProp}
+              addProp={this.props.addCustomProp}
+            />
+            <SettingsTemplate/>
   					<SettingsCollapsableItem 
   						title={'Audio'}
   						description={'Audio Settings'}
@@ -408,6 +481,10 @@ const mapDispatchToProps = {
 	cancelSettings: cancelSettings,
 	goToComps: goToComps,
 	toggleSettingsValue: toggleSettingsValue,
+  addCustomProp: addMetadataCustomProp,
+  onMetadataDeleteCustomProp: deleteMetadataCustomProp,
+  onMetadataTitleChange: metadataCustomPropTitleChange,
+  onMetadataValueChange: metadataCustomPropValueChange,
 	updateSettingsValue: updateSettingsValue,
 	toggleExtraComp: toggleExtraComp,
 }

@@ -2,7 +2,6 @@ import { createSelector } from 'reselect'
 
 const getFilter = (state) => state.compositions.filter
 const getSelected = (state) => state.compositions.show_only_selected
-const getCompNamesAsDefault = (state) => state.compositions.shouldUseCompNameAsDefault
 const getItems = (state) => state.compositions.items
 const getList = (state) => state.compositions.list
 
@@ -34,14 +33,23 @@ function checkRenderable(items, list) {
 }
 
 const getCompositionsList = createSelector(
-	[ getFilter, getItems, getList, getSelected, getCompNamesAsDefault ],
-	(filter, items, list, showOnlySelected, shouldUseCompNameAsDefault) => {
+	[
+    getFilter,
+    getItems,
+    getList,
+    getSelected,
+  ],
+	(
+    filter,
+    items,
+    list,
+    showOnlySelected,
+  ) => {
   	return {
-			canRender: checkRenderable(items, list),
-			filter: filter,
-			showOnlySelected: showOnlySelected,
-			shouldUseCompNameAsDefault: shouldUseCompNameAsDefault,
-			visibleItems: getVisibleItems(items, list, filter, showOnlySelected) 
+		canRender: checkRenderable(items, list),
+		filter: filter,
+    showOnlySelected: showOnlySelected,
+		visibleItems: getVisibleItems(items, list, filter, showOnlySelected),
   	}
 	}
 )

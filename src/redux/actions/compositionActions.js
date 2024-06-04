@@ -58,7 +58,37 @@ function cancelSettings(storedSettings) {
 function toggleSettingsValue(name) {
 	return {
 		type: actionTypes.SETTINGS_TOGGLE_VALUE,
-		name: name
+		name: name,
+	}
+}
+
+function addMetadataCustomProp(name) {
+	return {
+		type: actionTypes.SETTINGS_METADATA_CUSTOM_PROP_ADD,
+		name: name,
+	}
+}
+
+function deleteMetadataCustomProp(id) {
+	return {
+		type: actionTypes.SETTINGS_METADATA_CUSTOM_PROP_DELETE,
+		id,
+	}
+}
+
+function metadataCustomPropTitleChange(value, id) {
+	return {
+		type: actionTypes.SETTINGS_METADATA_CUSTOM_PROP_TITLE_CHANGE,
+		id,
+		value,
+	}
+}
+
+function metadataCustomPropValueChange(value, id) {
+	return {
+		type: actionTypes.SETTINGS_METADATA_CUSTOM_PROP_VALUE_CHANGE,
+		id,
+		value,
 	}
 }
 
@@ -95,6 +125,31 @@ function goToComps() {
 	}
 }
 
+function clearCache() {
+	return {
+		type: actionTypes.APP_CLEAR_CACHE,
+	}
+}
+
+function clearCacheConfirmed() {
+	return {
+		type: actionTypes.APP_CLEAR_CACHE_CONFIRMED,
+	}
+}
+
+function clearCacheCancelled() {
+	return {
+		type: actionTypes.APP_CLEAR_CACHE_CANCELLED,
+	}
+}
+
+function clearProjectsFromCache(ids) {
+	return {
+		type: actionTypes.APP_CLEAR_CACHE_PROJECTS,
+		ids: ids,
+	}
+}
+
 function toggleShowSelected() {
 	return {
 		type: actionTypes.SETTINGS_TOGGLE_SELECTED,
@@ -122,10 +177,10 @@ function applySettingsToSelectedComps(settings) {
 	}
 }
 
-function applySettingsFromCache(settings, allComps) {
+function applySettingsFromCache(comp, allComps) {
 	return {
 		type: actionTypes.SETTINGS_APPLY_FROM_CACHE,
-		settings,
+		comp,
 		allComps
 	}
 }
@@ -236,9 +291,61 @@ function toggleCompNameAsDefault() {
 	}
 }
 
+function toggleCompNameAsFolder() {
+	return {
+		type: actionTypes.SETTINGS_INCLUDE_COMP_NAME_AS_FOLDER_TOGGLE,
+	}
+}
+
+function toggleAEAsPath() {
+	return {
+		type: actionTypes.SETTINGS_AE_AS_PATH_TOGGLE,
+	}
+}
+
+function toggleCopySettings() {
+	return {
+		type: actionTypes.SETTINGS_PROJECT_SETTINGS_COPY,
+	}
+}
+
+function toggleDefaultPathAsFolder() {
+	return {
+		type: actionTypes.SETTINGS_PATH_AS_DEFAULT_FOLDER,
+	}
+}
+
+function defaultFolderFileChange(value) {
+	return {
+		type: actionTypes.SETTINGS_DEFAULT_FOLDER_PATH_UPDATE,
+		value,
+	}
+}
+
+function settingsCopyPathChange(value) {
+	return {
+		type: actionTypes.SETTINGS_COPY_PATH_UPDATE,
+		value,
+	}
+}
+
+function settingsCopyPathPathSelected(value) {
+	return {
+		type: actionTypes.SETTINGS_COPY_PATH_SELECTED,
+		value,
+	}
+}
+
 function settingsBannerLibraryFileSelected(value) {
 	return {
 		type: actionTypes.SETTINGS_BANNER_LIBRARY_FILE_SELECTED,
+		value,
+	}
+}
+
+function settingsDefaultFolderPathSelected(value) {
+	return {
+		type: actionTypes.SETTINGS_DEFAULT_FOLDER_PATH_SELECTED,
 		value,
 	}
 }
@@ -259,6 +366,75 @@ function goToReports(path) {
 	return {
 		type: actionTypes.GOTO_REPORTS,
 		path,
+	}
+}
+
+function goToSupportedFeatures() {
+	return {
+		type: actionTypes.GOTO_SUPPORTED_FEATURES,
+	}
+}
+
+function selectAllComps() {
+	return {
+		type: actionTypes.COMPOSITIONS_SELECT_ALL,
+	}
+}
+
+function unselectAllComps() {
+	return {
+		type: actionTypes.COMPOSITIONS_UNSELECT_ALL,
+	}
+}
+
+function loadSettings() {
+	return {
+		type: actionTypes.SETTINGS_LOAD,
+	}
+}
+
+function settingsLoaded(projectData) {
+	return {
+		type: actionTypes.SETTINGS_LOADED,
+		projectData,
+	}
+}
+
+function toggleSaveInProjectFile() {
+	return {
+		type: actionTypes.SETTINGS_SAVE_IN_PROJECT_FILE,
+	}
+}
+
+function toggleSkipDoneView() {
+	return {
+		type: actionTypes.SETTINGS_SKIP_DONE_VIEW,
+	}
+}
+
+function toggleReuseFontData() {
+	return {
+		type: actionTypes.SETTINGS_REUSE_FONT_DATA,
+	}
+}
+
+function deleteTemplate(value) {
+	return {
+		type: actionTypes.SETTINGS_TEMPLATES_DELETE,
+		value,
+	}
+}
+
+function templateLoaded(templateData) {
+	return {
+		type: actionTypes.SETTINGS_TEMPLATES_LOADED,
+		templateData,
+	}
+}
+
+function loadTemplate() {
+	return {
+		type: actionTypes.SETTINGS_TEMPLATES_LOAD,
 	}
 }
 
@@ -298,8 +474,35 @@ export {
 	lottieHandleLoopToggleChange,
 	lottieHandleLoopCountChange,
 	toggleCompNameAsDefault,
+	toggleCompNameAsFolder,
+	toggleAEAsPath,
+	toggleDefaultPathAsFolder,
+	settingsDefaultFolderPathSelected,
+	defaultFolderFileChange,
 	settingsBannerLibraryFileSelected,
 	goToAnnotations,
 	goToReports,
 	handleDemoBackgroundColorChange,
+	addMetadataCustomProp,
+	deleteMetadataCustomProp,
+	metadataCustomPropTitleChange,
+	metadataCustomPropValueChange,
+	selectAllComps,
+	unselectAllComps,
+	clearCache,
+	clearCacheConfirmed,
+	clearCacheCancelled,
+	toggleCopySettings,
+	settingsCopyPathChange,
+	settingsCopyPathPathSelected,
+	loadSettings,
+	settingsLoaded,
+	toggleSaveInProjectFile,
+	clearProjectsFromCache,
+	goToSupportedFeatures,
+	toggleSkipDoneView,
+	toggleReuseFontData,
+	deleteTemplate,
+	loadTemplate,
+	templateLoaded,
 }

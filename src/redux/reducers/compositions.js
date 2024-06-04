@@ -4,6 +4,10 @@ import LottieVersions, {findLottieVersion} from '../../helpers/LottieVersions'
 import LottieLibraryOrigins from '../../helpers/LottieLibraryOrigins'
 import audioBitOptions from '../../helpers/enums/audioBitOptions'
 import Variables from '../../helpers/styles/variables'
+import random from '../../helpers/randomGenerator'
+import {getSimpleSeparator} from '../../helpers/osHelper'
+import deepmerge from 'deepmerge'
+import { v4 as uuidv4 } from 'uuid';
 
 let initialState = {
 	list: [],
@@ -12,6 +16,20 @@ let initialState = {
 	current: 0,
 	show_only_selected: false,
 	shouldUseCompNameAsDefault: false,
+  shouldUseAEPathAsDestinationFolder: false,
+  shouldUsePathAsDefaultFolder: false,
+  shouldIncludeCompNameAsFolder: false,
+  defaultFolderPath: '',
+  shouldKeepCopyOfSettings: false,
+  settingsDestinationCopy: null,
+  shouldSaveInProjectFile: false,
+  shouldSkipDoneView: false,
+  shouldReuseFontData: false,
+  templates: {
+    active: true,
+    list: [
+    ]
+  }
 }
 let extensionReplacer = /\.\w*$/g
 
@@ -28,6 +46,7 @@ let defaultComposition = {
 		standalone: false,
 		avd: false,
 		glyphs: true,
+        includeExtraChars: false,
 		bundleFonts: false,
 		inlineFonts: false,
 		hiddens: false,
@@ -36,6 +55,7 @@ let defaultComposition = {
 		should_encode_images: false,
 		should_compress: true,
 		should_skip_images: false,
+        should_reuse_images: false,
 		should_include_av_assets: false,
 		compression_rate: 80,
 		extraComps: {
@@ -45,10 +65,12 @@ let defaultComposition = {
 		guideds: false,
 		ignore_expression_properties: false,
 		export_old_format: false,
+        use_source_names: false,
 		shouldTrimData: false,
 		skip_default_properties: false,
 		not_supported_properties: false,
 		pretty_print: false,
+        useCompNamesAsIds: false,
 		export_mode: ExportModes.STANDARD,
 		export_modes: {
 			standard: true,
@@ -56,6 +78,7 @@ let defaultComposition = {
 			standalone: false,
 			banner: false,
 			avd: false,
+          smil: false,
 			rive: false,
 			reports: false,
 		},
@@ -89,6 +112,20 @@ let defaultComposition = {
 			isEnabled: true,
 			shouldRaterizeWaveform: true,
 			bitrate: audioBitOptions[0].value,
+        },
+        metadata: {
+          includeFileName: false,
+          customProps: [],
+        },
+        template: {
+          active: false,
+          id: 0,
+          errors: [],
+        },
+        essentialProperties: {
+          active: true,
+          useSlots: false,
+          skipExternalComp: false,
 		}
 	}
 }
@@ -113,6 +150,7 @@ function createComp(comp) {
 	return {
 		...defaultComposition, 
 		id: comp.id, 
+    uid: uuidv4(), 
 		name: comp.name, 
 		settings: {
 			...defaultComposition.settings,
@@ -130,42 +168,33 @@ function createComp(comp) {
 	}
 }
 
+const overwriteMerge = (_, destinationArray) => destinationArray
+
 function setStoredData(state, action) {
-	let compositions = action.projectData.compositions
-	var item
-	for(var comp in compositions) {
-		if(Object.prototype.hasOwnProperty.call(compositions, comp)){
-			item = compositions[comp]
-			compositions[comp] = {
-				...item, 
-				settings:{
-					...defaultComposition.settings, 
-					...item.settings,
-					banner: {
-						...defaultComposition.settings.banner,
-						...item.settings.banner,
-					},
-					expressions: {
-						...defaultComposition.settings.expressions,
-						...item.settings.expressions,
-					},
-					audio: {
-						...defaultComposition.settings.audio,
-						...item.settings.audio,
-					}
-				}
-			}
-		}
-	}
-	let newState = {...state}
-	newState.items = compositions
-	if (action.projectData.extraState) {
-		newState = {
-			...newState,
-			...action.projectData.extraState,
-		}
-	}
-	return newState
+  let compositions = action.projectData.compositions
+  var item
+  for(var comp in compositions) {
+    if(compositions.hasOwnProperty(comp)){
+      item = compositions[comp]
+      if (!item.uid) {
+        item.uid = uuidv4();
+      }
+      compositions[comp] = deepmerge(defaultComposition, item, { arrayMerge: overwriteMerge })
+    }
+  }
+  console.log('compositions', compositions);
+  let newState = {...state}
+  newState.items = {
+    ...newState.items,
+    ...compositions,
+  }
+  if (action.projectData.extraState) {
+    newState = {
+      ...newState,
+      ...action.projectData.extraState,
+    }
+  }
+  return newState
 }
 
 /*function addCompositions(state, action) {
@@ -243,45 +272,45 @@ function updateCompsSize(settings, composition) {
 }
 
 function addCompositions(state, action) {
-	let newItems = {...state.items}
-	let listChanged = false
-	let itemsChanged = false
-	let newList = []
-	let i, len = action.compositions.length
-	let item, index
-	for(i = 0; i < len; i += 1) {
-		item = action.compositions[i]
-		index = i
-		if(!newItems[item.id]) {
-			newItems[item.id] = createComp(item)
-			itemsChanged = true
-		} else{
-			let itemData = newItems[item.id]
-			if(newItems[item.id].name !== item.name) {
-				itemData = {...state.items[item.id], ...{name: item.name}}
-				newItems[item.id] = itemData
-				//newItems[item.id].name = item.name
-				itemsChanged = true
-			}
-			let settings = searchRemovedExtraComps(itemData.settings, action.compositions)
-			settings = updateCompsSize(itemData.settings, item)
-			if(settings !== itemData.settings){
-				itemData = {...state.items[item.id], ...{settings: settings}}
-				newItems[item.id] = itemData
-				itemsChanged = true
-			}
-		} 
-		newList.push(item.id)
-		if(state.list[index] !== item.id) {
-			listChanged = true
-		}
-	}
-	if(!listChanged && state.list.length !== newList.length) {
-		listChanged = true
-	}
-	if(!itemsChanged && !listChanged) {
-		return state
-	}
+  const currentItems = state.items;
+  let newItems = {}
+  let listChanged = false
+  let itemsChanged = false
+  let newList = []
+  let i, len = action.compositions.length
+  let item, index
+  for(i = 0; i < len; i += 1) {
+    item = action.compositions[i]
+    index = i
+    if(!currentItems[item.id]) {
+      newItems[item.id] = createComp(item)
+      itemsChanged = true
+    } else{
+      let itemData = currentItems[item.id]
+      if(currentItems[item.id].name !== item.name) {
+        itemData = {...currentItems[item.id], ...{name: item.name}}
+        //newItems[item.id].name = item.name
+        itemsChanged = true
+      }
+      let settings = searchRemovedExtraComps(itemData.settings, action.compositions)
+      settings = updateCompsSize(itemData.settings, item)
+      if(settings !== itemData.settings){
+        itemData = {...currentItems[item.id], ...{settings: settings}}
+        itemsChanged = true
+      }
+      newItems[item.id] = itemData;
+    } 
+    newList.push(item.id)
+    if(state.list[index] !== item.id) {
+      listChanged = true
+    }
+  }
+  if(!listChanged && state.list.length !== newList.length) {
+    listChanged = true
+  }
+  if(!itemsChanged && !listChanged) {
+    return state
+  }
 
 	let newState = {...state}
 	if(listChanged) {
@@ -394,6 +423,18 @@ function cancelSettings(state, action) {
 	return newState
 }
 
+function toggleCustomProps(props, nameArray) {
+  return props.map(prop => {
+    if(prop.id === nameArray[0]) {
+      return {
+        ...prop,
+        active: !prop.active,
+      }
+    }
+    return prop
+  })
+}
+
 function toggleSettingsValue(state, action) {
 	let newItem = {...state.items[state.current]}
 	let newSettings = {...newItem.settings}
@@ -407,6 +448,10 @@ function toggleSettingsValue(state, action) {
 		var object = newSettings;
 		while (nameArray.length) {
 			var name = nameArray.shift();
+      if (name === '[CUSTOM_PROP]') {
+        object.customProps = toggleCustomProps(object.customProps, nameArray)
+        break;
+      }
 			if (nameArray.length) {
 				object[name] = {
 					...object[name],
@@ -485,7 +530,10 @@ function applySettingsToAllComps(state, action) {
 	const items = state.items
 	const itemKeys = Object.keys(items)
 	const newItems = itemKeys.reduce((accumulator, key) => {
-		const settingsClone = JSON.parse(JSON.stringify(action.settings))
+    // checking for the id field to identify old versions of this data stored in local storage
+    const settings = action.comp.id ? action.comp.settings : action.comp
+    const comp = action.comp.id ? action.comp : {}
+		const settingsClone = JSON.parse(JSON.stringify(settings))
 		const item = items[key]
 		if (item.selected) {
 			const itemSettings = {
@@ -494,6 +542,8 @@ function applySettingsToAllComps(state, action) {
 			}
 			accumulator[key] = {
 				...item,
+        destination: setFilePath(state, item.destination, comp.destination, item.name, getSimpleSeparator()),
+        absoluteURI: setFilePath(state, item.absoluteURI, comp.absoluteURI, item.name, '/'),
 				settings: itemSettings
 			}
 		} else {
@@ -507,13 +557,30 @@ function applySettingsToAllComps(state, action) {
 	}
 }
 
+function setFilePath(state, originalPath, suggestedPath, name, separator) {
+  if (originalPath) {
+    return originalPath;
+  }
+  if (!state.shouldUseCompNameAsDefault) {
+    return suggestedPath;
+  }
+  if(!suggestedPath) {
+    return '';
+  }
+  const lastFolderIndex = suggestedPath.lastIndexOf(separator)
+  return suggestedPath.substr(0, lastFolderIndex) + separator + name + '.json'
+}
+
 function applySettingsFromCache(state, action) {
 
 	if(action.allComps) {
 		return applySettingsToAllComps(state, action)
 	}
 
-	const settingsClone = JSON.parse(JSON.stringify(action.settings))
+  // checking for the id field to identify old versions of this data stored in local storage
+  const settings = action.comp.id ? action.comp.settings : action.comp
+  const comp = action.comp.id ? action.comp : {}
+	const settingsClone = JSON.parse(JSON.stringify(settings))
 
 	let item = state.items[state.current]
 	const newSettings = {
@@ -526,7 +593,9 @@ function applySettingsFromCache(state, action) {
 			...state.items,
 			[state.current]: {
 				...item,
-				settings: newSettings
+        destination: setFilePath(state, item.destination, comp.destination, item.name, getSimpleSeparator()),
+        absoluteURI: setFilePath(state, item.absoluteURI, comp.absoluteURI, item.name, '/'),
+				settings: newSettings,
 			}
 		}
 	}
@@ -673,24 +742,267 @@ function updateDemo(state, action) {
 }
 
 function toggleCompNameAsDefault(state, action) {
-	return {
-		...state,
-		shouldUseCompNameAsDefault: !state.shouldUseCompNameAsDefault,
-	}
+  return {
+    ...state,
+    shouldUseCompNameAsDefault: !state.shouldUseCompNameAsDefault,
+  }
+}
+
+function toggleAEPathAsDestinationFolder(state, action) {
+  return {
+    ...state,
+    shouldUseAEPathAsDestinationFolder: !state.shouldUseAEPathAsDestinationFolder,
+  }
+}
+
+function toggleSettingSCopy(state, action) {
+  return {
+    ...state,
+    shouldKeepCopyOfSettings: !state.shouldKeepCopyOfSettings,
+  }
+}
+
+function toggleDefaultFolder(state, action) {
+  return {
+    ...state,
+    shouldUsePathAsDefaultFolder: !state.shouldUsePathAsDefaultFolder,
+  }
+}
+function toggleIncludeCompNameAsFolder(state, action) {
+  return {
+    ...state,
+    shouldIncludeCompNameAsFolder: !state.shouldIncludeCompNameAsFolder,
+  }
+}
+
+function toggleSaveInProjectFile(state, action) {
+  return {
+    ...state,
+    shouldSaveInProjectFile: !state.shouldSaveInProjectFile,
+  }
+}
+
+function toggleSkipDoneView(state, action) {
+  return {
+    ...state,
+    shouldSkipDoneView: !state.shouldSkipDoneView,
+  }
+}
+
+function toggleReuseFontData(state, action) {
+  return {
+    ...state,
+    shouldReuseFontData: !state.shouldReuseFontData,
+  }
+}
+
+function setDefaultFolderPath(state, action) {
+  return {
+    ...state,
+    defaultFolderPath: action.value,
+  }
+}
+
+function setSettingsDestinationPath(state, action) {
+  return {
+    ...state,
+    settingsDestinationCopy: action.value,
+  }
 }
 
 function storeReportsPath(state, action) {
-	var comp = {
-		...state.items[action.compId],
-		reportPath: action.reportPath,
-	} || {}
-	return {
-		...state,
-		items: {
-			...state.items,
-			[action.compId]: comp,
-		}
-	}
+  var comp = {
+    ...state.items[action.compId],
+    reportPath: action.reportPath,
+  } || {}
+  return {
+    ...state,
+    items: {
+      ...state.items,
+      [action.compId]: comp,
+    }
+  }
+}
+
+const defaultMetadataCustomProp = {
+  name: '',
+  active: true,
+  value: 1,
+}
+
+function addMetadataCustomProp(state) {
+  const item = state.items[state.current]
+  return {
+    ...state,
+    items: {
+      ...state.items,
+      [state.current]: {
+        ...item,
+        settings: {
+          ...item.settings,
+          metadata: {
+            ...item.settings.metadata,
+            customProps: [
+              ...item.settings.metadata.customProps,
+              {
+                ...defaultMetadataCustomProp,
+                name: `Custom Property ${item.settings.metadata.customProps.length + 1}`,
+                id: random(10),
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+
+function deleteMetadataCustomProp(state, action) {
+  const item = state.items[state.current]
+  return {
+    ...state,
+    items: {
+      ...state.items,
+      [state.current]: {
+        ...item,
+        settings: {
+          ...item.settings,
+          metadata: {
+            ...item.settings.metadata,
+            customProps: item.settings.metadata.customProps.filter(item => item.id !== action.id)
+          }
+        }
+      }
+    }
+  }
+}
+
+function updateMetadataCustomPropTitle(state, action) {
+  const item = state.items[state.current]
+  return {
+    ...state,
+    items: {
+      ...state.items,
+      [state.current]: {
+        ...item,
+        settings: {
+          ...item.settings,
+          metadata: {
+            ...item.settings.metadata,
+            customProps: item.settings.metadata.customProps.map(item => {
+              if(item.id === action.id) {
+                return {
+                  ...item,
+                  name: action.value,
+                }
+              }
+              return item
+            })
+          }
+        }
+      }
+    }
+  }
+}
+
+function updateMetadataCustomPropValue(state, action) {
+  const item = state.items[state.current]
+  return {
+    ...state,
+    items: {
+      ...state.items,
+      [state.current]: {
+        ...item,
+        settings: {
+          ...item.settings,
+          metadata: {
+            ...item.settings.metadata,
+            customProps: item.settings.metadata.customProps.map(item => {
+              if(item.id === action.id) {
+                return {
+                  ...item,
+                  value: action.value,
+                }
+              }
+              return item
+            })
+          }
+        }
+      }
+    }
+  }
+}
+
+function setCompsSelection(state, value) {
+  const items = state.items
+  const itemKeys = Object.keys(items)
+  const newItems = itemKeys.reduce((accumulator, key) => {
+    const item = items[key]
+      accumulator[key] = {
+        ...item,
+        selected: value,
+      }
+    return accumulator
+  }, {})
+  return {
+    ...state,
+    items: newItems,
+  }
+}
+
+function selectAllComps(state, action) {
+  return setCompsSelection(state, true);
+}
+
+function unselectAllComps(state, action) {
+  return setCompsSelection(state, false);
+}
+
+function deleteTemplate(state, action) {
+  const templates = state.templates;
+  const list = templates.list;
+  const templateIndex = list.findIndex(template => template.value === action.value)
+  return {
+    ...state,
+    templates: {
+      ...state.templates,
+      list: [ ...list.slice(0, templateIndex), ...list.slice(templateIndex + 1) ]
+    }
+  }
+}
+
+function addTemplate(state, action) {
+  const templates = state.templates;
+  const list = templates.list;
+  return {
+    ...state,
+    templates: {
+      ...state.templates,
+      list: [ ...list, action.templateData]
+    }
+  }
+}
+
+function handleTemplateError(state, action) {
+  const item = state.items[action.compId];
+  const newItem = {
+    ...item,
+    settings: {
+      ...item.settings,
+      template: {
+        ...item.settings.template,
+        errors: action.errors,
+      }
+    }
+
+  }
+  return {
+    ...state,
+    items: {
+      ...state.items,
+      [action.compId]: newItem,
+    },
+  }
 }
 
 export default function compositions(state = initialState, action) {
@@ -708,6 +1020,7 @@ export default function compositions(state = initialState, action) {
 		case actionTypes.RENDER_COMPLETE:
 			return completeRender(state, action)
 		case actionTypes.PROJECT_STORED_DATA:
+    case actionTypes.SETTINGS_LOADED:
 			return setStoredData(state, action)
 		case actionTypes.COMPOSITION_DISPLAY_SETTINGS:
 		case actionTypes.COMPOSITIONS_SET_CURRENT_COMP_ID:
@@ -722,6 +1035,18 @@ export default function compositions(state = initialState, action) {
 			return updateSettingsValue(state, action)
 		case actionTypes.SETTINGS_COMP_NAME_AS_DEFAULT_TOGGLE:
 			return toggleCompNameAsDefault(state, action)
+    case actionTypes.SETTINGS_AE_AS_PATH_TOGGLE:
+      return toggleAEPathAsDestinationFolder(state, action)
+    case actionTypes.SETTINGS_PROJECT_SETTINGS_COPY:
+      return toggleSettingSCopy(state, action)
+    case actionTypes.SETTINGS_PATH_AS_DEFAULT_FOLDER:
+      return toggleDefaultFolder(state, action)
+    case actionTypes.SETTINGS_INCLUDE_COMP_NAME_AS_FOLDER_TOGGLE:
+      return toggleIncludeCompNameAsFolder(state, action)
+    case actionTypes.SETTINGS_DEFAULT_FOLDER_PATH_SELECTED:
+      return setDefaultFolderPath(state, action)
+    case actionTypes.SETTINGS_COPY_PATH_SELECTED:
+      return setSettingsDestinationPath(state, action)
 		case actionTypes.SETTINGS_TOGGLE_SELECTED:
 			return toggleSelected(state, action)
 		case actionTypes.SETTINGS_APPLY_FROM_CACHE:
@@ -746,6 +1071,30 @@ export default function compositions(state = initialState, action) {
 			return storeReportsPath(state, action)
 		case actionTypes.SETTINGS_DEMO_BACKGROUND_COLOR_CHANGE:
 			return updateDemo(state, action)
+    case actionTypes.SETTINGS_METADATA_CUSTOM_PROP_ADD:
+      return addMetadataCustomProp(state, action)
+    case actionTypes.SETTINGS_METADATA_CUSTOM_PROP_DELETE:
+      return deleteMetadataCustomProp(state, action)
+    case actionTypes.SETTINGS_METADATA_CUSTOM_PROP_TITLE_CHANGE:
+      return updateMetadataCustomPropTitle(state, action)
+    case actionTypes.SETTINGS_METADATA_CUSTOM_PROP_VALUE_CHANGE:
+      return updateMetadataCustomPropValue(state, action)
+    case actionTypes.COMPOSITIONS_SELECT_ALL:
+      return selectAllComps(state, action)
+    case actionTypes.COMPOSITIONS_UNSELECT_ALL:
+      return unselectAllComps(state, action)
+    case actionTypes.SETTINGS_SAVE_IN_PROJECT_FILE:
+      return toggleSaveInProjectFile(state, action)
+    case actionTypes.SETTINGS_SKIP_DONE_VIEW:
+      return toggleSkipDoneView(state, action)
+    case actionTypes.SETTINGS_REUSE_FONT_DATA:
+      return toggleReuseFontData(state, action)
+    case actionTypes.SETTINGS_TEMPLATES_DELETE:
+      return deleteTemplate(state, action)
+    case actionTypes.SETTINGS_TEMPLATES_LOADED:
+      return addTemplate(state, action)
+    case actionTypes.RENDER_TEMPLATE_ERROR:
+      return handleTemplateError(state, action)
 		default:
 			return state
 	}

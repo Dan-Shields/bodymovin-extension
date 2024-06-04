@@ -1,4 +1,8 @@
-import csInterface from './CSInterfaceHelper'
+import csInterface, {
+	sendAsyncCommand,
+	sendCommandWithListeners,
+	getXMPValue,
+} from './CSInterfaceHelper'
 import extensionLoader from './ExtensionLoader'
 import {dispatcher} from './storeDispatcher'
 import actions from '../redux/actions/actionTypes'
@@ -7,7 +11,10 @@ import {reportsSaved} from '../redux/actions/reportsActions'
 import {processExpression} from '../redux/actions/renderActions'
 import {saveFile as bannerSaveFile} from './bannerHelper'
 import {saveFile as avdSaveFile} from './avdHelper'
+import {saveFile as smilSaveFile} from './smilHelper'
 import {splitAnimation} from './splitAnimationHelper'
+import {createSlots} from './lottieSlots'
+import { getSimpleSeparator } from './osHelper'
 
 csInterface.addEventListener('bm:compositions:list', function (ev) {
 	if(ev.data) {
@@ -94,9 +101,23 @@ csInterface.addEventListener('bm:image:process', function (ev) {
 csInterface.addEventListener('bm:project:id', function (ev) {
 	if(ev.data) {
 		let data = (typeof ev.data === "string") ? JSON.parse(ev.data) : ev.data
-		let id = data.id
+		const id = data.id
+		const name = data.name
 		dispatcher({ 
 			type: actions.PROJECT_SET_ID,
+				id: id,
+				name: name,
+		})
+	} else {
+	}
+})
+
+csInterface.addEventListener('bm:temp:id', function (ev) {
+	if(ev.data) {
+		let data = (typeof ev.data === "string") ? JSON.parse(ev.data) : ev.data
+		let id = data.id
+		dispatcher({ 
+				type: actions.PROJECT_SET_TEMP_ID,
 			id: id
 		})
 	}
@@ -135,6 +156,22 @@ csInterface.addEventListener('bm:create:avd', async function (ev) {
 	    	const eScript = '$.__bodymovin.bm_avdExporter.saveAVDFailed()';
 	    	csInterface.evalScript(eScript);
 		} 
+	} else {
+	}
+})
+
+csInterface.addEventListener('bm:create:smil', async function (ev) {
+	if(ev.data) {
+		try {
+			let data = (typeof ev.data === "string") ? JSON.parse(ev.data) : ev.data;
+			await smilSaveFile(data.origin, data.destination)
+			const eScript = "$.__bodymovin.bm_smilExporter.saveSMILDataSuccess()";
+	    	csInterface.evalScript(eScript);
+		} catch(err) {
+	    	const eScript = '$.__bodymovin.bm_smilExporter.saveSMILFailed()';
+	    	csInterface.evalScript(eScript);
+		} 
+	} else {
 	}
 })
 
@@ -204,6 +241,21 @@ csInterface.addEventListener('bm:split:animation', async function (ev) {
 	}
 })
 
+csInterface.addEventListener('bm:create:slots', async function (ev) {
+	try {
+		if(ev.data) {
+			const data = (typeof ev.data === "string") ? JSON.parse(ev.data) : ev.data
+			////
+			await createSlots(data.origin, data.destination, decodeURIComponent(data.fileName), data.prettyPrint);
+			csInterface.evalScript('$.__bodymovin.bm_standardExporter.slotsSuccess()');
+		} else {
+			throw new Error('Missing data')
+		}
+	} catch(err) {
+		csInterface.evalScript('$.__bodymovin.bm_bannerExporter.splitFailed()');
+	}
+})
+
 csInterface.addEventListener('bm:report:saved', async function (ev) {
 	try {
 		if(ev.data) {
@@ -233,13 +285,21 @@ csInterface.addEventListener('bm:expression:process', async function (ev) {
 })
 
 function getCompositions() {
-	let prom = new Promise(function(resolve, reject){
+	return new Promise(function(resolve, reject){
 		extensionLoader.then(function(){
 			csInterface.evalScript('$.__bodymovin.bm_compsManager.updateData()');
 			resolve();
 		})
 	})
-	return prom
+}
+
+function createTempIdHeader() {
+	return new Promise(function(resolve, reject){
+		extensionLoader.then(function(){
+			csInterface.evalScript('$.__bodymovin.bm_projectManager.createTempId()');
+			resolve();
+		})
+	})
 }
 
 function getProjectPath() {
@@ -270,6 +330,10 @@ function getDestinationPath(comp, alternatePath, shouldUseCompNameAsDefault) {
 		destinationPath = comp.absoluteURI
 	} else if(alternatePath) {
 		alternatePath = alternatePath.split('\\').join('\\\\')
+		const delimiter = getSimpleSeparator()
+		if (alternatePath.charAt(alternatePath.length - 1) !== delimiter) {
+			alternatePath += delimiter;
+		}
 		alternatePath += fileName
 		if(comp.settings.export_modes.standalone) {
 			alternatePath += '.js'
@@ -411,55 +475,96 @@ function navigateToLayer(compositionId, layerIndex) {
 }
 
 async function getCompositionTimelinePosition() {
-	return new Promise(async function(resolve, reject) {
-		function handleTimelineUpdate(ev) {
-			if (ev.data) {
-				const timelineData = (typeof ev.data === "string") ? JSON.parse(ev.data) : ev.data
-				resolve(timelineData)
-			}
-			csInterface.removeEventListener('bm:composition:timelinePosition', handleTimelineUpdate)
-		}
-		csInterface.addEventListener('bm:composition:timelinePosition', handleTimelineUpdate)
-
-		await extensionLoader;
-		var eScript = '$.__bodymovin.bm_compsManager.getTimelinePosition()';
-	    csInterface.evalScript(eScript);
-	})
-	
+	return sendCommandWithListeners(
+		'$.__bodymovin.bm_compsManager.getTimelinePosition',
+		[],
+		'bm:composition:timelinePosition',
+		''
+	);
 }
 
 async function setCompositionTimelinePosition(progress) {
-	await extensionLoader;
-	var eScript = '$.__bodymovin.bm_compsManager.setTimelinePosition(' + progress + ')';
-	csInterface.evalScript(eScript);
+	return sendAsyncCommand(
+		'$.__bodymovin.bm_compsManager.setTimelinePosition',
+		[progress],
+	)
 	
 }
 
 function expressionProcessed(id, data) {
-	extensionLoader.then(function(){
-		var eScript = `$.__bodymovin.bm_expressionHelper.saveExpression(${JSON.stringify(data)}, "${id}")`;
-	    csInterface.evalScript(eScript);
-	})
+	sendAsyncCommand(
+		'$.__bodymovin.bm_expressionHelper.saveExpression',
+		[data, id],
+	)
 }
 
 async function getUserFolders() {
-	return new Promise(async function(resolve, reject) {
-		function onUserFoldersFetched(ev) {
-			if (ev.data) {
-				const foldersData = (typeof ev.data === "string")
-					? JSON.parse(ev.data)
-					: ev.data
-				resolve(foldersData)
-			}
-			csInterface.removeEventListener('bm:user:folders', onUserFoldersFetched)
-		}
-		csInterface.addEventListener('bm:user:folders', onUserFoldersFetched)
+	return sendCommandWithListeners(
+		'$.__bodymovin.bm_projectManager.getUserFolders',
+		[],
+		'bm:user:folders',
+		''
+	)
+}
 
-		await extensionLoader;
-		var eScript = '$.__bodymovin.bm_projectManager.getUserFolders()';
-	    csInterface.evalScript(eScript);
+async function getSavingPath(path) {
+	return sendCommandWithListeners(
+		'$.__bodymovin.bm_projectManager.setDestinationPath',
+		[
+			path,
+		],
+		'bm:destination:selected',
+		'bm:destination:cancelled'
+	)
+}
+
+async function saveProjectDataToXMP(data) {
+	return new Promise(async function(resolve, reject) {
+		var eScript = '$.__bodymovin.bm_XMPHelper.setMetadata("config", \'' + JSON.stringify(data) + '\')';
+		csInterface.evalScript(eScript);
+		setStorageLocation('xmp');
+		resolve();
 	})
-	
+}
+
+async function getProjectDataFromXMP() {
+	return getXMPValue(
+		"config",
+		true,
+	)
+}
+
+async function setStorageLocation(location) {
+	return sendAsyncCommand(
+		'$.__bodymovin.bm_XMPHelper.setMetadata',
+		["storageLocation", location],
+	)
+}
+
+async function getStorageLocation() {
+	return getXMPValue(
+		"storageLocation",
+		false,
+	)
+}
+
+async function getCompressedState() {
+	try {
+		const isCompressed = await getXMPValue(
+			"isCompressed",
+			false,
+		)
+		return isCompressed;
+	} catch (error) {
+		return false;
+	}
+}
+
+async function setCompressedState(value) {
+	return sendAsyncCommand(
+		'$.__bodymovin.bm_XMPHelper.setMetadata',
+		["isCompressed", value],
+	)
 }
 
 export {
@@ -483,4 +588,12 @@ export {
 	setCompositionTimelinePosition,
 	getUserFolders,
 	expressionProcessed,
+	getSavingPath,
+	saveProjectDataToXMP,
+	getProjectDataFromXMP,
+	setStorageLocation,
+	getStorageLocation,
+	getCompressedState,
+	setCompressedState,
+	createTempIdHeader,
 }

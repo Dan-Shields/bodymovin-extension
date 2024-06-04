@@ -89,6 +89,11 @@ $.__bodymovin.bm_layerElement = (function () {
                 layerData.tt = 4;
                 break;
             }
+            if ('trackMatteLayer' in layerInfo) {
+                layerData.tp = layerInfo.trackMatteLayer.index;
+            } else {
+                layerData.tp = layerInfo.index - 1;
+            }
         } else if (layerInfo.isTrackMatte) {
             if (layerInfo.isValid !== false) {
                 layerData.render = true;
@@ -114,7 +119,14 @@ $.__bodymovin.bm_layerElement = (function () {
                 layerData.refId = sourceId;
             } else {
                 //layerData.compId = bm_generalUtils.random(7);
-                layerData.compId = 'comp_' + compCount;
+                if (settingsHelper.shouldUseCompNamesAsIds()) {
+                    layerData.compId = layerInfo.source.name;
+                } else {
+                    layerData.compId = 'comp_' + compCount;
+                }
+                layerData.compName = layerInfo.source.name;
+                layerData.frameRate = layerInfo.source.frameRate;
+                layerData.preserveNestedFrameRate = layerInfo.source.preserveNestedFrameRate ? 1 : undefined;
                 compCount += 1;
                 layerData.refId = layerData.compId;
                 bm_sourceHelper.setCompSourceId(layerInfo.source, layerData.compId);
@@ -185,6 +197,7 @@ $.__bodymovin.bm_layerElement = (function () {
         layerData.ip = layerInfo.inPoint * frameRate;
         layerData.op = layerInfo.outPoint * frameRate;
         layerData.st = layerInfo.startTime * frameRate;
+        layerData.ct = layerInfo.collapseTransformation ? 1 : undefined;
         if (lType === layerTypes.audio) {
             // Settings inpoint equal to start point because audio is rasterized and trimmed
             layerData.st = layerData.ip;

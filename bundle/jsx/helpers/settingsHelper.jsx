@@ -28,12 +28,20 @@ $.__bodymovin.bm_settingsHelper = (function () {
         return _settings.should_skip_images && !_settings.should_encode_images;
     }
 
+    function shouldReuseImages() {
+        return _settings.should_reuse_images;
+    }
+
     function shouldIgnoreExpressionProperties() {
         return _settings.ignore_expression_properties;
     }
 
     function shouldExportOldFormat() {
         return _settings.export_old_format;
+    }
+
+    function shouldUseSourceNames() {
+        return _settings.use_source_names;
     }
 
     function shouldSkipDefaultProperties() {
@@ -96,12 +104,34 @@ $.__bodymovin.bm_settingsHelper = (function () {
         return _settings.original_names;
     }
 
+    function shouldReplaceCharactersWithComps() {
+        return _settings.includeExtraChars;
+    }
+
+    function shouldUseCompNamesAsIds() {
+        return _settings.useCompNamesAsIds;
+    }
+
+    function shouldCopyOriginalAsset() {
+        return _settings.original_assets;
+    }
+    function shouldExportEssentialProperties() {
+        return _settings.essentialProperties.active;
+    }
+    function shouldExportEssentialPropertiesAsSlots() {
+        return _settings.essentialProperties.useSlots;
+    }
+    function shouldSkipExternalComposition() {
+        return shouldExportEssentialProperties() && _settings.essentialProperties.skipExternalComp;
+    }
+
     ob.set = setData
     ob.get = getData
     ob.shouldCompressImages = shouldCompressImages;
     ob.getCompressionQuality = getCompressionQuality;
     ob.shouldEncodeImages = shouldEncodeImages;
     ob.shouldSkipImages = shouldSkipImages;
+    ob.shouldReuseImages = shouldReuseImages;
     ob.shouldIgnoreExpressionProperties = shouldIgnoreExpressionProperties;
     ob.shouldExportOldFormat = shouldExportOldFormat;
     ob.shouldSkipDefaultProperties = shouldSkipDefaultProperties;
@@ -119,6 +149,13 @@ $.__bodymovin.bm_settingsHelper = (function () {
     ob.shouldTrimData = shouldTrimData;
     ob.shouldRasterizeWaveform = shouldRasterizeWaveform;
     ob.shouldUserOriginalNames = shouldUserOriginalNames;
+    ob.shouldUseSourceNames = shouldUseSourceNames;
+    ob.shouldReplaceCharactersWithComps = shouldReplaceCharactersWithComps;
+    ob.shouldUseCompNamesAsIds = shouldUseCompNamesAsIds;
+    ob.shouldCopyOriginalAsset = shouldCopyOriginalAsset;
+    ob.shouldExportEssentialProperties = shouldExportEssentialProperties;
+    ob.shouldExportEssentialPropertiesAsSlots = shouldExportEssentialPropertiesAsSlots;
+    ob.shouldSkipExternalComposition = shouldSkipExternalComposition;
 
     return ob;
 }());

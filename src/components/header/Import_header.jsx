@@ -2,6 +2,7 @@ import React from 'react'
 import { StyleSheet, css } from 'aphrodite'
 import BaseButton from '../buttons/Base_button'
 import Variables from '../../helpers/styles/variables'
+import BaseHeader from './Base_Header'
 
 const styles = StyleSheet.create({
 	container: {
@@ -73,12 +74,9 @@ function getHeaderType(importState) {
 
 function Import_header(props) {
 	return (<div className={css(styles.container)}>
-		<div className={css(styles.buttons_container)}>
-			<div className={css(styles.buttons_separator)}></div>
-			<BaseButton text='Back' type='gray' classes={styles.right} onClick={props.onBack}/>
-		</div>
-		<div className={css(styles.buttons_container)}>
-			{getHeaderType(props.state) !== 'processing' && 
+                <BaseHeader/>
+				<div className={css(styles.buttons_container)}>
+                    {getHeaderType(props.state) !== 'processing' && 
                         <div className={css(styles.buttons_subgroup)}>
                         	<BaseButton text='Import Local File' type='green' classes={styles.button_flex} onClick={props.onSelect} />
                         	<div className={css(styles.input_container)}>

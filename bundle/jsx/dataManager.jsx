@@ -15,6 +15,7 @@ $.__bodymovin.bm_dataManager = (function () {
     var bm_standaloneExporter = $.__bodymovin.bm_standaloneExporter;
     var bm_demoExporter = $.__bodymovin.bm_demoExporter;
     var bm_avdExporter = $.__bodymovin.bm_avdExporter;
+    var bm_smilExporter = $.__bodymovin.bm_smilExporter;
     var bm_riveExporter = $.__bodymovin.bm_riveExporter;
     var bm_fileManager = $.__bodymovin.bm_fileManager;
     var layerTypes = $.__bodymovin.layerTypes;
@@ -22,6 +23,9 @@ $.__bodymovin.bm_dataManager = (function () {
 
     var results = {
         avd: {
+            status: exportStatuses.IDLE
+        },
+        smil: {
             status: exportStatuses.IDLE
         },
         banner: {
@@ -47,11 +51,17 @@ $.__bodymovin.bm_dataManager = (function () {
             if (layers[i].ty === layerTypes.precomp && layers[i].compId) {
                 comps.push({
                     id: layers[i].compId,
+                    nm: layers[i].compName,
+                    fr: layers[i].frameRate,
+                    pfr: layers[i].preserveNestedFrameRate,
                     layers: layers[i].layers
                 });
                 separateComps(layers[i].layers, comps);
                 delete layers[i].compId;
                 delete layers[i].layers;
+                delete layers[i].compName;
+                delete layers[i].frameRate;
+                delete layers[i].preserveNestedFrameRate;
             }
         }
     }
@@ -141,6 +151,7 @@ $.__bodymovin.bm_dataManager = (function () {
 
     function resetStatus() {
         results[exportTypes.AVD].status = exportStatuses.IDLE;
+        results[exportTypes.SMIL].status = exportStatuses.IDLE;
         results[exportTypes.BANNER].status = exportStatuses.IDLE;
         results[exportTypes.DEMO].status = exportStatuses.IDLE;
         results[exportTypes.RIVE].status = exportStatuses.IDLE;
@@ -149,7 +160,6 @@ $.__bodymovin.bm_dataManager = (function () {
     }
     
     function saveData(data, destinationPath, config, callback) {
-
         resetStatus();
 
         _endCallback = callback;
@@ -176,6 +186,7 @@ $.__bodymovin.bm_dataManager = (function () {
         ////
 
         bm_avdExporter.save(destinationPath, config, onResult);
+        bm_smilExporter.save(destinationPath, config, onResult);
         bm_bannerExporter.save(destinationPath, config, onResult);
         bm_demoExporter.save(destinationPath, config, onResult, data);
         bm_riveExporter.save(destinationPath, config, onResult);

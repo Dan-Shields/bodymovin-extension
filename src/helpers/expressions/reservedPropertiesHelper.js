@@ -1,9 +1,9 @@
 /*jslint vars: true , plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
 
 const reserverPropertiesHelper = (function () {
-	var ob = {
-		replaceProperties: replaceProperties
-	};
+    var ob = {
+        replaceProperties: replaceProperties
+    };
 
 	var reserved_properties = ['position', 'scale', 'anchorPoint', 'rotation']
 
@@ -33,7 +33,7 @@ const reserverPropertiesHelper = (function () {
 				function_arguments.push(element.params[i].name);
 			}
 		}
-		return new Closure(element.body, function_arguments.concat(declared_variables));
+		return new Closure(element.body.body, function_arguments.concat(declared_variables));
 	}
 
 	function arrayIndexOf(arr, value) {
@@ -97,7 +97,8 @@ const reserverPropertiesHelper = (function () {
 
 	function processFunctionExpression(expression, inner_closures, declared_variables) {
 		if(expression.body && expression.body.type === 'BlockStatement') {
-			inner_closures.push(new Closure(expression.body.body, declared_variables));
+			inner_closures.push(createFunctionClosure(expression, declared_variables));
+            // inner_closures.push(new Closure(expression.body.body, declared_variables));
 		}
 	}
 
@@ -332,7 +333,7 @@ const reserverPropertiesHelper = (function () {
 				processVariableDeclaration(element, inner_closures, declared_variables);
 			} else if (element.type === 'FunctionDeclaration') {
 				if (element.body && element.body.type === 'BlockStatement') {
-					inner_closures.push(createFunctionClosure(element.body, declared_variables));
+					inner_closures.push(createFunctionClosure(element, declared_variables));
 				}
 			} else if (element.type === 'ReturnStatement') {
 				processReturnStatement(element, inner_closures, declared_variables);

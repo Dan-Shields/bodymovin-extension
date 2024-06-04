@@ -6,6 +6,7 @@ $.__bodymovin.bm_keyframeHelper = (function () {
     var bm_expressionHelper = $.__bodymovin.bm_expressionHelper;
     var settingsHelper = $.__bodymovin.bm_settingsHelper;
     var bakeExpressions = $.__bodymovin.bm_keyframeBakerHelper;
+    var essentialPropertiesHelper = $.__bodymovin.bm_essentialPropertiesHelper;
     var renderHelper = $.__bodymovin.bm_renderHelper;
     var ob = {}, property, j = 1, jLen, beziersArray, averageSpeed, duration, bezierIn, bezierOut, frameRate;
     var hasRovingKeyframes = false;
@@ -437,7 +438,29 @@ $.__bodymovin.bm_keyframeHelper = (function () {
     }
     
     function exportKeyframes(prop, frRate, stretch, keyframeValues) {
+        settingsHelper = $.__bodymovin.bm_settingsHelper;
         var returnOb = {}
+        if (settingsHelper.shouldExportEssentialProperties()) {
+            if (settingsHelper.shouldExportEssentialPropertiesAsSlots()) {
+                var essentialPropId = essentialPropertiesHelper.searchPropertyId(prop);
+                if (essentialPropId) {
+                    returnOb.sid = essentialPropId;
+                }
+            } else {
+                var essentialProperty = essentialPropertiesHelper.searchProperty(prop);
+                if (essentialProperty) {
+                    for (var key in essentialProperty) {
+                        if (essentialProperty.hasOwnProperty(key)) {
+                            returnOb[key] = essentialProperty[key];
+                        }
+                    }
+                    if(prop.propertyIndex && !settingsHelper.shouldIgnoreExpressionProperties()) {
+                        returnOb.ix = prop.propertyIndex;
+                    }
+                    return returnOb;
+                }
+            }
+        }
         if (bm_expressionHelper.shouldBakeExpression(prop)) {
             returnOb = bakeExpressions(prop, frRate);
         } else {

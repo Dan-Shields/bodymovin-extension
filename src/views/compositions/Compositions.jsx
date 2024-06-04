@@ -10,18 +10,18 @@ import {
 	toggleItem, 
 	displaySettings, 
 	getCompositions, 
-	goToPreview, 
-	goToPlayer, 
 	toggleShowSelected, 
 	applySettingsToSelectedComps,
 	toggleCompNameAsDefault,
-	goToImportFile,
-	goToAnnotations,
+	toggleCompNameAsFolder,
 	goToReports,
+	selectAllComps,
+	unselectAllComps,
 } from '../../redux/actions/compositionActions'
 import {startRender, showRenderBlock} from '../../redux/actions/renderActions'
 import compositions_selector from '../../redux/selectors/compositions_selector'
 import Variables from '../../helpers/styles/variables'
+import GlobalSettings from './globalSettings/GlobalSettings'
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -61,7 +61,9 @@ class Compositions extends React.Component {
 		this.selectDestination = this.selectDestination.bind(this)
 		this.showSettings = this.showSettings.bind(this)
 		this.renderComps = this.renderComps.bind(this)
-		//this.goToPreview = this.goToPreview.bind(this)
+		this.state = {
+			globalSettings: false,
+		}
 	}
 
 	selectDestination(comp) {
@@ -72,28 +74,46 @@ class Compositions extends React.Component {
 		this.props.displaySettings(item.id);
 	}
 
-	goToReports = path => {
-		this.props.goToReports(path);
+	openGlobalSettings = () => {
+		this.setState({
+			globalSettings: true,
+		})
 	}
 
-
+	closeGlobalSettings = () => {
+		this.setState({
+			globalSettings: false,
+		})
+	}
 
 	renderComps() {
 		if(!this.props.canRender){
 			this.props.showRenderBlock(['There are no Compositions to render.','Make sure you have at least one selected and a Destination Path set.'])
 		} else {
 			this.props.startRender()
-			//browserHistory.push('/render')
 		}
-		
 	}
-	/*goToPreview() {
-		//browserHistory.push('/preview')
-	}*/
-	
-	/*goToPlayer() {
-		browserHistory.push('/player')
-	}*/
+
+	renderSelectAllButton() {
+		const hasUnselectedItems = this.props.visibleItems.some(item => item.selected === false)
+		if (hasUnselectedItems) {
+			return (
+				<div 
+					className={css(styles.toggleButton)} 
+					onClick={this.props.selectAllComps}>
+						{'Select All Comps'}
+				</div>
+			)
+		} else {
+			return (
+				<div 
+					className={css(styles.toggleButton)} 
+					onClick={this.props.unselectAllComps}>
+						{'Unselect All Comps'}
+				</div>
+			)
+		}
+	}
 
 	render() {
 		return (
@@ -102,21 +122,15 @@ class Compositions extends React.Component {
 					<MainHeader 
 						canRender={this.props.canRender}
 						startRender={this.renderComps} 
-						goToPreview={this.props.goToPreview} 
 						refresh={this.props.getCompositions} 
-						goToImportFile={this.props.goToImportFile} 
-						goToPlayer={this.props.goToPlayer}
-						goToAnnotations={this.props.goToAnnotations}
-						goToReports={this.props.goToReports}
+						applySettings={this.props.applySettingsToSelectedComps} 
+						openGlobalSettings={this.openGlobalSettings}
 					/>
 				</div>
 				<div className={css(styles.content)} >
 					<CompositionsListHeader 
 						filterValue={this.props.filter} 
 						filterChange={this.props.filterChange} 
-						shouldUseCompNameAsDefault={this.props.shouldUseCompNameAsDefault} 
-						onCompNameAsDefaultToggle={this.props.onCompNameAsDefaultToggle} 
-
 					/>
 					<CompositionsList 
 						items={this.props.visibleItems} 
@@ -130,12 +144,13 @@ class Compositions extends React.Component {
 						onClick={this.props.toggleShowSelected}>
 						{this.props.showOnlySelected ? 'Show All' : 'Show Selected Compositions'}
 					</div>
-					<div 
-						className={css(styles.toggleButton)} 
-						onClick={this.props.applySettingsToSelectedComps}>
-						{'Apply Stored Settings to Selected Comps'}
-					</div>
+					{this.renderSelectAllButton()}
 				</div>
+				{this.state.globalSettings && 
+					<GlobalSettings
+						onClose={this.closeGlobalSettings}
+					/>
+				}
 			</div>
 		)
 	}
@@ -152,14 +167,13 @@ const mapDispatchToProps = {
 	getCompositions: getCompositions,
 	filterChange: filterChange,
 	startRender: startRender,
-	goToPreview: goToPreview,
-	goToPlayer: goToPlayer,
 	showRenderBlock: showRenderBlock,
 	toggleShowSelected: toggleShowSelected,
+	selectAllComps: selectAllComps,
+	unselectAllComps: unselectAllComps,
 	applySettingsToSelectedComps: applySettingsToSelectedComps,
-	goToImportFile: goToImportFile,
 	onCompNameAsDefaultToggle: toggleCompNameAsDefault,
-	goToAnnotations: goToAnnotations,
+	onIncludeCompNameAsFolderToggle: toggleCompNameAsFolder,
 	goToReports: goToReports,
 }
 

@@ -4,6 +4,7 @@ import {saveFontsFromLocalStorage, getFontsFromLocalStorage} from '../../helpers
 import {setFonts, imageProcessed, riveFileSaveSuccess, riveFileSaveFailed, expressionProcessed} from '../../helpers/CompositionsProvider'
 import renderFontSelector from '../selectors/render_font_selector'
 import setFontsSelector from '../selectors/set_fonts_selector'
+import globalSettingsSelector from '../selectors/global_settings_selector'
 import imageProcessor from '../../helpers/ImageProcessorHelper'
 import {saveFile as riveSaveFile} from '../../helpers/riveHelper'
 import {getEncodedFile} from '../../helpers/FileLoader'
@@ -12,6 +13,19 @@ import expressionProcessor from '../../helpers/expressions/expressions'
 function *searchStoredFonts(action) {
 	try{
 		let storedFonts = yield call(getFontsFromLocalStorage, action.data.fonts)
+		const {
+			shouldReuseFontData,
+		} = yield select(globalSettingsSelector);
+
+		// If reusing font data is enabled and there is no missing font data, we return to the exporter.
+		if (shouldReuseFontData) {
+			const missingFont = storedFonts.some(fontData => fontData.data === null);
+			if (!missingFont) {
+				const fontsData = storedFonts.map(font => font.data);
+				setFonts(fontsData);
+				return;
+			}
+		}
 		yield put({ 
 			type: actions.RENDER_STORED_FONTS_FETCHED,
 			storedFonts: storedFonts
@@ -57,6 +71,9 @@ function *saveFonts() {
 	try{
 		let fontsInfo = yield select(setFontsSelector)
 		setFonts(fontsInfo)
+		fontsInfo.forEach(font => {
+			saveFontsFromLocalStorage(font);
+		})
 	} catch(err) {
 
 	}
@@ -103,8 +120,12 @@ function *saveRiveFile(action) {
 }
 
 function *processExpression(action) {
-	const expressionData = yield call(expressionProcessor, action.data.text);
-	yield call(expressionProcessed, action.data.id, expressionData);
+	try {
+		const expressionData = yield call(expressionProcessor, action.data.text);
+		yield call(expressionProcessed, action.data.id, expressionData);
+	} catch (err) {
+		yield call(expressionProcessed, action.data.id, {});
+	}
 }
 
 export default [

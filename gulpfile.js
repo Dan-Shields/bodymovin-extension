@@ -9,7 +9,7 @@ var replace = require('gulp-replace');
 var gzip = require('gulp-gzip');
 var insert = require('gulp-insert');
 
-var version = '5.7.8'
+var version = '5.12.0'
 
 var extensionSource = './bundle';
 var extensionDestination = path.join(process.env.APPDATA || (process.platform === 'darwin' ? path.join(process.env.HOME, '/Library/Application Support') : '.'), 'Adobe/CEP/extensions/bodymovin');

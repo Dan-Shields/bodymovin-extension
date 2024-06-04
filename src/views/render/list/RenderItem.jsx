@@ -3,6 +3,7 @@ import { StyleSheet, css } from 'aphrodite'
 import status_button from '../../../assets/svg/cancel_button.svg'
 import complete_icon from '../../../assets/svg/complete_icon.svg'
 import report_icon from '../../../assets/svg/report.svg'
+import warning_icon from '../../../assets/svg/warning.svg'
 import Variables from '../../../helpers/styles/variables'
 import BodymovinFolder from '../../../components/bodymovin/bodymovin_folder'
 
@@ -52,7 +53,8 @@ const styles = StyleSheet.create({
 		width: '30px',
 		height: '100%',
 		flexGrow: 0,
-		padding: '5px'
+		padding: '5px',
+        cursor: 'pointer',
 	},
 	'compElementContentToggle--clickable': {
     	width: '30px',
@@ -93,21 +95,30 @@ let RenderItem = (props) => {
                     >
                     	<img src={report_icon}  className={css(styles.compElementContentFolder__image)} alt='Report' />
                     </div>
-			}
-			<div
-				onClick={()=>props.preview(props.item)}
-				className={css(styles.compElementContentToggle)}
-				title={'Preview'}
-			>
-				<img src={complete_icon}  className={css(styles.compElementContentFolder__image)} alt='toggle' />
-			</div>
-			<div className={css(styles.compElementContentFolder)}>
-				<div className={css(styles.compElementContentFolder__button)} onClick={()=>props.navigateToFolder(props.item)}>
-					<BodymovinFolder />
+                }
+                    <div
+                        onClick={()=>props.preview(props.item)}
+                        className={css(styles.compElementContentToggle)}
+                        title={'Preview'}
+                    >
+                    <img src={complete_icon}  className={css(styles.compElementContentFolder__image)} alt='toggle' />
+                    </div>
+                    {props.item.settings.template && !!props.item.settings.template.errors.length && 
+                        <div
+                            onClick={()=>props.template(props.item)}
+                            className={css(styles.compElementContentToggle)}
+                            title={'Blueprint report'}
+                        >
+                        <img src={warning_icon}  className={css(styles.compElementContentFolder__image)} alt='toggle' />
+                        </div>
+                    }
+				<div className={css(styles.compElementContentFolder)}>
+                    <div className={css(styles.compElementContentFolder__button)} onClick={()=>props.navigateToFolder(props.item)}>
+                        <BodymovinFolder />
+                    </div>
 				</div>
 			</div>
-		</div>
-	</li>)
+			</li>)
 }
 
 export default RenderItem

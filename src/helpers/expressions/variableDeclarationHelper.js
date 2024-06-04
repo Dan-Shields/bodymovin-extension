@@ -41,42 +41,31 @@ const variableDeclarationHelper = (function () {
 
 	function findUndeclaredVariables(body, pos, predeclared, declared, undeclared, isContinuation) {
 
-		function addAssignment(expression) {
-			var variableName;
-			if (expression.left && expression.left.name) {
-				variableName = expression.left.name;
-				if(variableName === 'value'){
-					return;
-				}
-				var i = 0, len = declared.length;
-				while (i < len) {
-					if (declared[i] === variableName) {
-						return;
-					}
-					i += 1;
-				}
-				i = 0;
-				len = declared.length;
-				while (i < len) {
-					if (undeclared[i] === variableName) {
-						return;
-					}
-					i += 1;
-				}
-				undeclared.push(variableName);
-			}
-		}
-
-		function addSequenceExpressions(expressions) {
-			var i, len = expressions.length;
-			for (i = 0; i < len; i += 1) {
-				if (expressions[i].type === 'AssignmentExpression') {
-					addAssignment(expressions[i]);
-				} else if (expressions[i].type === 'SequenceExpression') {
-					addSequenceExpressions(expressions[i].expressions);
-				}
-			}
-		}
+        function addAssignment(expression) {
+            var variableName;
+            if (expression.left && expression.left.name) {
+                variableName = expression.left.name;
+                if(variableName === 'value'){
+                    return;
+                }
+                var i = 0, len = declared.length;
+                while (i < len) {
+                    if (declared[i] === variableName) {
+                        return;
+                    }
+                    i += 1;
+                }
+                i = 0;
+                len = declared.length;
+                while (i < len) {
+                    if (undeclared[i] === variableName) {
+                        return;
+                    }
+                    i += 1;
+                }
+                undeclared.push(variableName);
+            }
+        }
 
 		function addDeclaredVariable(variableName) {
 			var i = 0, len = declared.length;
